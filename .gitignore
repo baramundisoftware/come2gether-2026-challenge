@@ -1,0 +1,23 @@
+# Secrets
+.env
+*-key.md
+*.key
+
+# Claude Code
+.claude/
+CLAUDE.md
+
+# Docker volumes
+n8n_data/
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Internal planning
+Tasks.md
+Requirements.md
+reports/

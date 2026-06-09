@@ -1,0 +1,34 @@
+{
+  "name": "Challenge 03: KI-Infrastruktur-Berater",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "placeholder-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-sonnet-4-20250514",
+          "mode": "id"
+        }
+      },
+      "id": "placeholder-claude",
+      "name": "Claude",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.4,
+      "position": [340, 520]
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "description": "KI-Workflow: Claude AI Agent mit 3 MCP-Servern (Endpoints, Jobs, Compliance) fuer natuerlichsprachliche Infrastruktur-Analyse."
+  }
+}
