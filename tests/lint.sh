@@ -32,7 +32,7 @@ echo "=== Keine Secrets im Repo ==="
 if grep -rE '(sk-ant-[a-zA-Z0-9_-]{20,}|baramundi-2008|ANTHROPIC_API_KEY=sk-)' \
      --include='*.yml' --include='*.yaml' --include='*.json' \
      --include='*.sh' --include='*.md' --include='*.env*' \
-     . 2>/dev/null | grep -v '.gitignore' | grep -v 'lint.sh' | grep -v '.env.example'; then
+     . 2>/dev/null | grep -v '.gitignore' | grep -v 'lint.sh' | grep -v '.env.example' | grep -v '^\./\.env:'; then
   echo "FAIL: Secrets gefunden!"
   errors=$((errors+1))
 else

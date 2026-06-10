@@ -90,12 +90,14 @@ services:
       N8N_HOST: "0.0.0.0"
       N8N_PORT: "5678"
       N8N_DIAGNOSTICS_ENABLED: "false"
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
     depends_on:
       mcp-gateway:
         condition: service_healthy
     volumes:
       - n8n_data:/home/node/.n8n
       - ./workflows:/seed/workflows:ro
+      - ./scripts/seed-anthropic-credential.sh:/seed-anthropic-credential.sh:ro
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:5678/healthz"]
       interval: 30s
@@ -119,6 +121,8 @@ services:
       N8N_URL: http://c2g-n8n:5678
       N8N_OWNER_EMAIL: ${N8N_OWNER_EMAIL:-demo@c2g.local}
       N8N_OWNER_PASSWORD: ${N8N_OWNER_PASSWORD:-Baramundi2026}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      CLAUDE_MODEL: ${CLAUDE_MODEL:-claude-opus-4-7}
     networks:
       - challenge-net
 

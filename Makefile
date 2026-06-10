@@ -38,8 +38,16 @@ build-n8n:  ## n8n Demo Image bauen (inkl. Connector + Mock)
 
 # ── Run ────────────────────────────────────────────────────
 
-up: ## Container starten
+up: ## Container starten + Credentials seeden + Model patchen
 	$(COMPOSE) up -d
+	@echo "Warte auf n8n healthy ..."
+	@for i in $$(seq 1 30); do \
+	  docker inspect --format='{{.State.Health.Status}}' c2g-n8n 2>/dev/null | grep -q healthy && break; \
+	  sleep 3; \
+	done
+	@sleep 8
+	@docker exec c2g-n8n sh /seed-anthropic-credential.sh 2>/dev/null || true
+	@bash scripts/patch-claude-model.sh 2>/dev/null || true
 
 down: ## Container stoppen
 	$(COMPOSE) down

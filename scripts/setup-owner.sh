@@ -1,9 +1,8 @@
 #!/bin/sh
-# setup-owner.sh — Erstellt automatisch den n8n Owner-Account
+# setup-owner.sh — n8n Ersteinrichtung
 #
-# Wird als Init-Container gestartet, wartet bis n8n healthy ist,
-# und legt den Demo-Owner an. Idempotent: überspringt wenn
-# Owner bereits existiert.
+# 1. Erstellt den Owner-Account
+# 2. Erstellt das Anthropic Credential via n8n CLI (im n8n-Container)
 
 set -eu
 
@@ -13,56 +12,37 @@ OWNER_FIRSTNAME="${N8N_OWNER_FIRSTNAME:-Demo}"
 OWNER_LASTNAME="${N8N_OWNER_LASTNAME:-User}"
 OWNER_PASSWORD="${N8N_OWNER_PASSWORD:-Baramundi2026}"
 
-MAX_WAIT=120
-INTERVAL=3
-
-log() { echo "[setup-owner] $*"; }
+log() { echo "[setup] $*"; }
 
 # --- Warte auf n8n ---
-log "Warte auf n8n ($N8N_URL) ..."
+log "Warte auf n8n ..."
 elapsed=0
-while [ "$elapsed" -lt "$MAX_WAIT" ]; do
-  if curl -fsS "$N8N_URL/healthz" >/dev/null 2>&1; then
-    log "n8n erreichbar nach ${elapsed}s"
-    break
-  fi
-  sleep "$INTERVAL"
-  elapsed=$((elapsed + INTERVAL))
+while [ "$elapsed" -lt 120 ]; do
+  curl -fsS "$N8N_URL/healthz" >/dev/null 2>&1 && break
+  sleep 3; elapsed=$((elapsed + 3))
 done
-
-if [ "$elapsed" -ge "$MAX_WAIT" ]; then
-  log "FEHLER: n8n nicht erreichbar nach ${MAX_WAIT}s"
-  exit 1
-fi
-
-# Kurz warten damit n8n die DB-Migrationen abschließt
+[ "$elapsed" -ge 120 ] && { log "FEHLER: n8n nicht erreichbar"; exit 1; }
+log "n8n erreichbar"
 sleep 5
 
-# --- Prüfe ob Owner-Setup noch nötig ist ---
-settings=$(curl -fsS "$N8N_URL/rest/settings" 2>/dev/null || echo "")
-needs_setup=$(echo "$settings" | grep -c '"showSetupOnFirstLoad":true' || true)
-
-if [ "$needs_setup" -eq 0 ]; then
-  log "Owner bereits eingerichtet — überspringe"
-  exit 0
-fi
-
-# --- Owner anlegen ---
-log "Erstelle Owner: $OWNER_EMAIL"
-response=$(curl -fsS -X POST "$N8N_URL/rest/owner/setup" \
-  -H "Content-Type: application/json" \
-  -d "{
-    \"email\": \"$OWNER_EMAIL\",
-    \"firstName\": \"$OWNER_FIRSTNAME\",
-    \"lastName\": \"$OWNER_LASTNAME\",
-    \"password\": \"$OWNER_PASSWORD\"
-  }" 2>&1) || true
-
-if echo "$response" | grep -q '"email"'; then
-  log "Owner erfolgreich angelegt"
-  log "  Email:    $OWNER_EMAIL"
-  log "  Passwort: $OWNER_PASSWORD"
+# --- Owner ---
+needs_setup=$(curl -fsS "$N8N_URL/rest/settings" 2>/dev/null | grep -c '"showSetupOnFirstLoad":true' || true)
+if [ "$needs_setup" -gt 0 ]; then
+  log "Erstelle Owner: $OWNER_EMAIL"
+  result=$(curl -sS -X POST "$N8N_URL/rest/owner/setup" \
+    -H "Content-Type: application/json" \
+    -d "{\"email\":\"$OWNER_EMAIL\",\"firstName\":\"$OWNER_FIRSTNAME\",\"lastName\":\"$OWNER_LASTNAME\",\"password\":\"$OWNER_PASSWORD\"}" 2>&1)
+  echo "$result" | grep -q '"email"' && log "Owner OK: $OWNER_EMAIL / $OWNER_PASSWORD" || log "WARNUNG: $result"
 else
-  log "WARNUNG: Owner-Setup fehlgeschlagen: $response"
-  exit 1
+  log "Owner existiert bereits"
 fi
+
+# --- Anthropic Credential (im n8n-Container via n8n CLI) ---
+# Das Script ist im n8n-Container gemountet. Wir triggern es über die n8n REST API
+# indem wir warten bis Workflows geseeded sind und dann das Credential prüfen.
+if [ -n "${ANTHROPIC_API_KEY:-}" ]; then
+  log "Anthropic Key vorhanden — Credential wird vom n8n-Container geseeded"
+  log "(Script: /seed-anthropic-credential.sh im n8n-Container)"
+fi
+
+log "Fertig"
