@@ -4,7 +4,7 @@
 
 Siehe Quick Start im README für die plattformspezifischen Befehle.
 
-Öffne http://localhost:5678 — Login: `demo` / `baramundi`
+Öffne http://localhost:5678 — Login: `demo@c2g.local` / `Baramundi2026`
 
 ## Die 3 Beispiel-Workflows
 

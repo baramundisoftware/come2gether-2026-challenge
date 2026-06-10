@@ -30,7 +30,7 @@ Dann starten:
 docker compose up -d
 ```
 
-Öffne http://localhost:5678 — Login: `demo` / `baramundi`
+Öffne http://localhost:5678 — Login: `demo@c2g.local` / `Baramundi2026`
 
 > **Voraussetzung:** [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 > (Windows / Mac) oder Docker Engine + Docker Compose (Linux).
@@ -172,6 +172,9 @@ c2g-2026-challenge/
 │   ├── AUFGABE.md                     # Aufgabenstellung
 │   ├── BEWERTUNG.md                   # Bewertungskriterien
 │   └── TIPPS.md                       # Hilfreiche Links und Tipps
+│
+├── scripts/
+│   └── setup-owner.sh                 # Automatisches n8n Owner-Setup
 │
 ├── branding/
 │   ├── baramundi-logo.svg             # Logo für HTML-Reports

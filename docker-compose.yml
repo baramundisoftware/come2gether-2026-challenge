@@ -8,7 +8,7 @@
 # Starten:
 #   cp .env.example .env
 #   docker-compose up -d
-#   open http://localhost:5678   (Login: demo / baramundi)
+#   open http://localhost:5678   (Login: demo@c2g.local / Baramundi2026)
 #
 # Umschaltung Mock / Real bConnect: nur .env anpassen,
 # dann: docker-compose down -v && docker-compose up -d
@@ -102,6 +102,23 @@ services:
       timeout: 5s
       start_period: 90s
       retries: 3
+    networks:
+      - challenge-net
+
+  # ── n8n Owner-Setup (einmalig beim ersten Start) ──────────
+  n8n-init:
+    image: curlimages/curl:latest
+    container_name: c2g-init
+    depends_on:
+      n8n:
+        condition: service_healthy
+    volumes:
+      - ./scripts/setup-owner.sh:/setup-owner.sh:ro
+    entrypoint: ["sh", "/setup-owner.sh"]
+    environment:
+      N8N_URL: http://c2g-n8n:5678
+      N8N_OWNER_EMAIL: ${N8N_OWNER_EMAIL:-demo@c2g.local}
+      N8N_OWNER_PASSWORD: ${N8N_OWNER_PASSWORD:-Baramundi2026}
     networks:
       - challenge-net
 
