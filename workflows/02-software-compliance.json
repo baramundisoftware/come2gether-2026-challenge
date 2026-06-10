@@ -3,30 +3,30 @@
   "nodes": [
     {
       "parameters": {
-        "rule": {
-          "interval": [{ "field": "hours", "hoursInterval": 24 }]
-        }
+        "content": "## Workflow 2: Software-Compliance\n\n**Schwierigkeit:** Mittel\n\nPrüft die installierte Software auf allen Windows-Endpoints\ngegen eine konfigurierbare Allowlist/Blocklist.\n\n**Ablauf:**\n1. Manual Trigger → Start per Klick\n2. Windows Endpoints holen (nur Windows, per endpointType)\n3. Installierte Software holen\n4. Code-Node → Compliance-Prüfung:\n   - Verbotene Software (Torrent, Spiele) → Kritisch\n   - Nicht genehmigte Software → Warnung\n   - Erlaubte Software → Konform\n5. IF-Node → Verzweigung nach Ergebnis\n6. HTML-Report mit Ampel-System oder \"Alles OK\"\n\n**Lerneffekt:** Daten-Enrichment, Allowlist-Logik,\nbedingte Verzweigung (IF-Node), HTML-Report-Generierung",
+        "width": 400,
+        "height": 400
       },
-      "id": "c2g02-0001-0001-0001-000000000001",
-      "name": "Täglich 07:00",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
-      "position": [180, 200],
-      "notes": "Startet den Compliance-Check täglich.\nKann auch manuell über 'Test workflow' ausgelöst werden."
+      "id": "c2g02-note-0001-0001-000000000000",
+      "name": "Beschreibung",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-200, 100]
     },
     {
       "parameters": {},
-      "id": "c2g02-0001b-001-0001-000000000002",
+      "id": "c2g02-0001-0001-0001-000000000001",
       "name": "Manueller Start",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
-      "position": [180, 400],
-      "notes": "Alternativ: Manuell starten für Tests."
+      "position": [180, 300],
+      "notes": "Klicke 'Test workflow' um den Compliance-Check zu starten."
     },
     {
       "parameters": {
         "resource": "endpoint",
         "operation": "getMany",
+        "endpointType": "windows",
         "returnAll": true,
         "bmsVersion": "26R1"
       },
@@ -34,7 +34,7 @@
       "name": "Windows Endpoints holen",
       "type": "CUSTOM.baramundiEndpoint",
       "typeVersion": 1,
-      "position": [440, 300],
+      "position": [420, 300],
       "credentials": {
         "bconnectApi": {
           "id": "bconnectdefault0",
@@ -55,7 +55,7 @@
       "name": "Installierte Software holen",
       "type": "CUSTOM.baramundiSoftware",
       "typeVersion": 1,
-      "position": [440, 500],
+      "position": [660, 300],
       "credentials": {
         "bconnectApi": {
           "id": "bconnectdefault0",
@@ -66,32 +66,14 @@
     },
     {
       "parameters": {
-        "mode": "combine",
-        "combinationMode": "mergeByFields",
-        "mergeByFields": {
-          "values": [
-            { "field1": "id", "field2": "endpointId" }
-          ]
-        },
-        "options": { "multipleMatches": "all" }
-      },
-      "id": "c2g02-0004-0001-0001-000000000005",
-      "name": "Endpoints + Software verknüpfen",
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3,
-      "position": [700, 400],
-      "notes": "Verknüpft jeden Endpoint mit seiner installierten Software\nüber Endpoint-ID."
-    },
-    {
-      "parameters": {
-        "jsCode": "// Software-Compliance-Prüfung\n// baramundi come2gether 2026 Challenge\n\nconst items = $input.all();\n\n// === KONFIGURATION ===\nconst allowed = [\n  'Microsoft Office', 'Google Chrome', 'Mozilla Firefox',\n  'Microsoft Teams', '7-Zip', 'Notepad++', 'Adobe Acrobat Reader',\n  'Visual Studio Code', 'WinRAR'\n];\n\nconst forbidden = [\n  'BitTorrent', 'uTorrent', 'Vuze',\n  'Steam', 'Epic Games', 'Origin',\n  'TeamViewer', 'AnyDesk',\n];\n\nconst required = [\n  'Microsoft Office', 'Google Chrome'\n];\n\nconst outdated = [\n  { name: 'Java Runtime Environment', maxVersion: '8.0.400' },\n  { name: 'Adobe Acrobat Reader', maxVersion: '23.008.20000' }\n];\n\n// === ANALYSE ===\nconst endpointMap = new Map();\n\nfor (const item of items) {\n  const epId = item.json.id || item.json.endpointId;\n  const epName = item.json.displayName || item.json.hostName || 'Unbekannt';\n  if (!endpointMap.has(epId)) {\n    endpointMap.set(epId, {\n      id: epId, name: epName,\n      os: item.json.operatingSystem || '-',\n      software: [], violations: []\n    });\n  }\n  if (item.json.displayName_1 || item.json.softwareName) {\n    endpointMap.get(epId).software.push({\n      name: item.json.displayName_1 || item.json.softwareName || '',\n      version: item.json.version_1 || item.json.softwareVersion || '',\n      publisher: item.json.publisher || ''\n    });\n  }\n}\n\nconst results = [];\nfor (const [epId, ep] of endpointMap) {\n  const swNames = ep.software.map(s => s.name);\n\n  for (const sw of ep.software) {\n    if (forbidden.some(f => sw.name.toLowerCase().includes(f.toLowerCase()))) {\n      ep.violations.push({ type:'forbidden', severity:'critical', software:sw.name, version:sw.version, message:`Verbotene Software: ${sw.name}` });\n    }\n  }\n\n  for (const req of required) {\n    if (!swNames.some(n => n.toLowerCase().includes(req.toLowerCase()))) {\n      ep.violations.push({ type:'missing', severity:'warning', software:req, version:'-', message:`Pflicht-Software fehlt: ${req}` });\n    }\n  }\n\n  for (const rule of outdated) {\n    const match = ep.software.find(s => s.name.toLowerCase().includes(rule.name.toLowerCase()));\n    if (match && match.version <= rule.maxVersion) {\n      ep.violations.push({ type:'outdated', severity:'warning', software:match.name, version:match.version, message:`Veraltete Version: ${match.name} ${match.version}` });\n    }\n  }\n\n  results.push(ep);\n}\n\nconst totalEndpoints = results.length;\nconst compliant = results.filter(r => r.violations.length === 0).length;\nconst withViolations = totalEndpoints - compliant;\nconst criticalCount = results.reduce((s, r) => s + r.violations.filter(v => v.severity === 'critical').length, 0);\nconst warningCount = results.reduce((s, r) => s + r.violations.filter(v => v.severity === 'warning').length, 0);\n\nreturn { json: { results, stats: { totalEndpoints, compliant, withViolations, criticalCount, warningCount }, hasViolations: withViolations > 0 } };\n"
+        "jsCode": "// Software-Compliance-Prüfung\n// baramundi come2gether 2026 Challenge\n\nconst endpointItems = $('Windows Endpoints holen').all();\nconst softwareItems = $('Installierte Software holen').all();\n\n// === KONFIGURATION ===\n// Nur diese Software-Titel sind erlaubt (Allowlist)\nconst allowlist = [\n  'Microsoft Office', 'Google Chrome', 'Mozilla Firefox',\n  'Microsoft Teams', '7-Zip', 'Notepad++', 'Adobe Acrobat Reader',\n  'WinRAR', 'Microsoft Edge'\n];\n\n// Diese Software ist verboten (Blocklist)\nconst blocklist = [\n  'BitTorrent', 'uTorrent', 'Vuze',\n  'Steam', 'Epic Games', 'Origin',\n  'TeamViewer', 'AnyDesk'\n];\n\n// Software die nicht in der Allowlist ist, wird als 'nicht genehmigt' gemeldet\n// (nur als Info, nicht als Violation)\nconst flagUnlisted = true;\n\n// Endpoint-Node liefert bereits nur Windows (endpointType=windows)\nconst windowsEndpoints = endpointItems;\n\n// === Software nach Endpoint gruppieren + deduplizieren ===\nconst softwareByEndpoint = new Map();\nfor (const item of softwareItems) {\n  const epId = item.json.endpointId || '';\n  if (!epId) continue;\n  if (!softwareByEndpoint.has(epId)) {\n    softwareByEndpoint.set(epId, new Map());\n  }\n  const swMap = softwareByEndpoint.get(epId);\n  const name = item.json.displayName || item.json.name || '';\n  if (name && !swMap.has(name)) {\n    swMap.set(name, {\n      name: name,\n      version: item.json.version || '',\n      publisher: item.json.publisher || ''\n    });\n  }\n}\n\n// === Analyse pro Endpoint ===\nconst results = [];\n\nfor (const epItem of windowsEndpoints) {\n  const epId = epItem.json.id || '';\n  const swMap = softwareByEndpoint.get(epId);\n  const software = swMap ? Array.from(swMap.values()) : [];\n\n  const ep = {\n    id: epId,\n    name: epItem.json.displayName || epItem.json.hostName || 'Unbekannt',\n    os: epItem.json.operatingSystem || '-',\n    software: software,\n    violations: []\n  };\n\n  // Nur prüfen wenn Software-Daten vorhanden\n  if (software.length > 0) {\n    // Verbotene Software\n    for (const sw of software) {\n      if (blocklist.some(b => sw.name.toLowerCase().includes(b.toLowerCase()))) {\n        ep.violations.push({\n          severity: 'critical',\n          software: sw.name, version: sw.version,\n          message: 'Verbotene Software: ' + sw.name\n        });\n      }\n    }\n\n    // Nicht genehmigte Software (nicht in Allowlist)\n    if (flagUnlisted) {\n      for (const sw of software) {\n        const isAllowed = allowlist.some(a => sw.name.toLowerCase().includes(a.toLowerCase()));\n        const isBlocked = blocklist.some(b => sw.name.toLowerCase().includes(b.toLowerCase()));\n        if (!isAllowed && !isBlocked) {\n          ep.violations.push({\n            severity: 'warning',\n            software: sw.name, version: sw.version,\n            message: 'Nicht genehmigte Software: ' + sw.name\n          });\n        }\n      }\n    }\n  }\n\n  results.push(ep);\n}\n\n// === Statistik ===\nconst totalEndpoints = results.length;\nconst compliant = results.filter(r => r.violations.length === 0).length;\nconst withViolations = totalEndpoints - compliant;\nconst criticalCount = results.reduce((s, r) =>\n  s + r.violations.filter(v => v.severity === 'critical').length, 0);\nconst warningCount = results.reduce((s, r) =>\n  s + r.violations.filter(v => v.severity === 'warning').length, 0);\n\nreturn {\n  json: {\n    results,\n    stats: { totalEndpoints, compliant, withViolations, criticalCount, warningCount },\n    hasViolations: withViolations > 0\n  }\n};\n"
       },
       "id": "c2g02-0005-0001-0001-000000000006",
       "name": "Compliance prüfen",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [940, 400],
-      "notes": "Prüft installierte Software gegen:\n- Allowlist (erlaubte Software)\n- Blocklist (verbotene Software)\n- Pflicht-Software (muss vorhanden sein)\n- Veraltete Versionen"
+      "position": [900, 300],
+      "notes": "Prüft nur Windows-Endpoints.\nSoftware wird dedupliziert und gegen Allowlist/Blocklist geprüft.\n\nErgebnis:\n- Endpoints ohne Software-Daten = Konform (nichts zu prüfen)\n- Verbotene Software = Kritisch\n- Nicht genehmigte Software = Warnung"
     },
     {
       "parameters": {
@@ -113,30 +95,30 @@
       "name": "Violations vorhanden?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [1160, 400],
+      "position": [1120, 300],
       "notes": "Verzweigung: JA = Report, NEIN = Alles OK"
     },
     {
       "parameters": {
-        "jsCode": "const { results, stats } = $input.first().json;\nconst now = new Date().toLocaleString('de-DE', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });\n\nconst severityColors = {\n  critical: { bg:'#fce4ec', border:'#c62828', text:'#c62828', label:'Kritisch' },\n  warning:  { bg:'#fff8e1', border:'#f57f17', text:'#f57f17', label:'Warnung' },\n  ok:       { bg:'#e8f5e9', border:'#2e7d32', text:'#2e7d32', label:'Konform' }\n};\n\nconst violationRows = results.filter(ep => ep.violations.length > 0)\n  .flatMap(ep => ep.violations.map(v => {\n    const c = severityColors[v.severity];\n    return `<tr><td style=\"font-weight:500;\">${ep.name}</td><td>${ep.os}</td><td><span style=\"background:${c.bg};color:${c.text};padding:3px 10px;border-radius:4px;font-size:12px;font-weight:600;border-left:3px solid ${c.border};\">${c.label}</span></td><td>${v.software}</td><td>${v.version}</td><td>${v.message}</td></tr>`;\n  })).join('');\n\nconst compliantRows = results.filter(ep => ep.violations.length === 0)\n  .map(ep => `<tr><td style=\"font-weight:500;\">${ep.name}</td><td>${ep.os}</td><td><span style=\"background:#e8f5e9;color:#2e7d32;padding:3px 10px;border-radius:4px;font-size:12px;font-weight:600;border-left:3px solid #2e7d32;\">Konform</span></td><td colspan=\"3\" style=\"color:#888;\">Keine Auffälligkeiten</td></tr>`).join('');\n\nconst html = `<!DOCTYPE html><html lang=\"de\"><head><meta charset=\"UTF-8\"><title>Software-Compliance Report</title>\n<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;padding:24px}.container{max-width:1400px;margin:0 auto;background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.08);overflow:hidden}.header{background:linear-gradient(135deg,#003c71,#00a3e0);color:#fff;padding:28px 36px}.header h1{font-size:24px}.header .sub{font-size:13px;opacity:.9;margin-top:4px}.tiles{display:flex;gap:16px;flex-wrap:wrap;padding:24px 36px;background:#fafbfc;border-bottom:1px solid #e9ecef}.tile{padding:16px 20px;border-radius:6px;min-width:140px}.tile .num{font-size:28px;font-weight:700}.tile .lbl{font-size:13px;margin-top:4px}table{width:100%;border-collapse:collapse;font-size:14px}thead tr{background:#003c71;color:#fff}th{padding:12px 16px;text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.5px;font-weight:600}td{padding:10px 16px;border-bottom:1px solid #e9ecef}tbody tr:hover{background:#f8f9fa}.section{padding:24px 36px}.section h2{font-size:18px;color:#003c71;margin-bottom:16px}.footer{background:#fafbfc;padding:14px 36px;border-top:1px solid #e9ecef;font-size:12px;color:#888;text-align:center}</style></head>\n<body><div class=\"container\">\n<div class=\"header\"><h1>Software-Compliance Report</h1><div class=\"sub\">baramundi Management Suite &mdash; ${now}</div></div>\n<div class=\"tiles\">\n  <div class=\"tile\" style=\"background:#003c71;color:#fff;\"><div class=\"num\">${stats.totalEndpoints}</div><div class=\"lbl\">Endpoints</div></div>\n  <div class=\"tile\" style=\"background:#e8f5e9;border-left:4px solid #2e7d32;\"><div class=\"num\" style=\"color:#2e7d32;\">${stats.compliant}</div><div class=\"lbl\">Konform</div></div>\n  <div class=\"tile\" style=\"background:#fff8e1;border-left:4px solid #f57f17;\"><div class=\"num\" style=\"color:#f57f17;\">${stats.warningCount}</div><div class=\"lbl\">Warnungen</div></div>\n  <div class=\"tile\" style=\"background:#fce4ec;border-left:4px solid #c62828;\"><div class=\"num\" style=\"color:#c62828;\">${stats.criticalCount}</div><div class=\"lbl\">Kritisch</div></div>\n</div>\n<div class=\"section\"><h2>Auffälligkeiten</h2><div style=\"overflow-x:auto;\"><table><thead><tr><th>Endpoint</th><th>OS</th><th>Status</th><th>Software</th><th>Version</th><th>Details</th></tr></thead><tbody>${violationRows}</tbody></table></div></div>\n<div class=\"section\"><h2>Konforme Endpoints</h2><div style=\"overflow-x:auto;\"><table><thead><tr><th>Endpoint</th><th>OS</th><th>Status</th><th colspan=\"3\">Details</th></tr></thead><tbody>${compliantRows}</tbody></table></div></div>\n<div class=\"footer\">baramundi come2gether 2026 Challenge &mdash; Workflow 02: Software-Compliance</div>\n</div></body></html>`;\n\nreturn { json: { html } };\n"
+        "jsCode": "const { results, stats } = $input.first().json;\nconst now = new Date().toLocaleString('de-DE', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });\n\nconst severityColors = {\n  critical: { bg:'#fce4ec', border:'#c62828', text:'#c62828', label:'Kritisch' },\n  warning:  { bg:'#fff8e1', border:'#f57f17', text:'#f57f17', label:'Warnung' },\n  ok:       { bg:'#e8f5e9', border:'#2e7d32', text:'#2e7d32', label:'Konform' }\n};\n\nconst violationRows = results.filter(ep => ep.violations.length > 0)\n  .flatMap(ep => ep.violations.map(v => {\n    const c = severityColors[v.severity];\n    return '<tr><td style=\"font-weight:500;\">' + ep.name + '</td><td>' + ep.os + '</td><td><span style=\"background:' + c.bg + ';color:' + c.text + ';padding:3px 10px;border-radius:4px;font-size:12px;font-weight:600;border-left:3px solid ' + c.border + ';\">' + c.label + '</span></td><td>' + v.software + '</td><td>' + v.version + '</td><td>' + v.message + '</td></tr>';\n  })).join('');\n\nconst compliantRows = results.filter(ep => ep.violations.length === 0)\n  .map(ep => {\n    var swCount = ep.software ? ep.software.length : 0;\n    var detail = swCount > 0 ? swCount + ' Programme geprüft — alle genehmigt' : 'Keine Software-Daten vorhanden';\n    return '<tr><td style=\"font-weight:500;\">' + ep.name + '</td><td>' + ep.os + '</td><td><span style=\"background:#e8f5e9;color:#2e7d32;padding:3px 10px;border-radius:4px;font-size:12px;font-weight:600;border-left:3px solid #2e7d32;\">Konform</span></td><td colspan=\"3\" style=\"color:#888;\">' + detail + '</td></tr>';\n  }).join('');\n\nconst html = '<!DOCTYPE html><html lang=\"de\"><head><meta charset=\"UTF-8\"><title>Software-Compliance Report</title>' +\n'<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Segoe UI,Arial,sans-serif;background:#f0f2f5;padding:24px}.container{max-width:1400px;margin:0 auto;background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.08);overflow:hidden}.header{background:linear-gradient(135deg,#003c71,#00a3e0);color:#fff;padding:28px 36px}.header h1{font-size:24px}.header .sub{font-size:13px;opacity:.9;margin-top:4px}.tiles{display:flex;gap:16px;flex-wrap:wrap;padding:24px 36px;background:#fafbfc;border-bottom:1px solid #e9ecef}.tile{padding:16px 20px;border-radius:6px;min-width:140px}.tile .num{font-size:28px;font-weight:700}.tile .lbl{font-size:13px;margin-top:4px}table{width:100%;border-collapse:collapse;font-size:14px}thead tr{background:#003c71;color:#fff}th{padding:12px 16px;text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.5px;font-weight:600}td{padding:10px 16px;border-bottom:1px solid #e9ecef}tbody tr:hover{background:#f8f9fa}.section{padding:24px 36px}.section h2{font-size:18px;color:#003c71;margin-bottom:16px}.footer{background:#fafbfc;padding:14px 36px;border-top:1px solid #e9ecef;font-size:12px;color:#888;text-align:center}</style></head>' +\n'<body><div class=\"container\">' +\n'<div class=\"header\"><h1>Software-Compliance Report</h1><div class=\"sub\">baramundi Management Suite &mdash; ' + now + '</div></div>' +\n'<div class=\"tiles\">' +\n'  <div class=\"tile\" style=\"background:#003c71;color:#fff;\"><div class=\"num\">' + stats.totalEndpoints + '</div><div class=\"lbl\">Windows Endpoints</div></div>' +\n'  <div class=\"tile\" style=\"background:#e8f5e9;border-left:4px solid #2e7d32;\"><div class=\"num\" style=\"color:#2e7d32;\">' + stats.compliant + '</div><div class=\"lbl\">Konform</div></div>' +\n'  <div class=\"tile\" style=\"background:#fff8e1;border-left:4px solid #f57f17;\"><div class=\"num\" style=\"color:#f57f17;\">' + stats.warningCount + '</div><div class=\"lbl\">Warnungen</div></div>' +\n'  <div class=\"tile\" style=\"background:#fce4ec;border-left:4px solid #c62828;\"><div class=\"num\" style=\"color:#c62828;\">' + stats.criticalCount + '</div><div class=\"lbl\">Kritisch</div></div>' +\n'</div>' +\n(violationRows ? '<div class=\"section\"><h2>Auffälligkeiten</h2><div style=\"overflow-x:auto;\"><table><thead><tr><th>Endpoint</th><th>OS</th><th>Status</th><th>Software</th><th>Version</th><th>Details</th></tr></thead><tbody>' + violationRows + '</tbody></table></div></div>' : '') +\n'<div class=\"section\"><h2>Konforme Endpoints</h2><div style=\"overflow-x:auto;\"><table><thead><tr><th>Endpoint</th><th>OS</th><th>Status</th><th colspan=\"3\">Details</th></tr></thead><tbody>' + compliantRows + '</tbody></table></div></div>' +\n'<div class=\"footer\">baramundi come2gether 2026 Challenge &mdash; Workflow 02: Software-Compliance</div>' +\n'</div></body></html>';\n\nreturn { json: { html } };\n"
       },
       "id": "c2g02-0007-0001-0001-000000000008",
       "name": "Compliance-Report erzeugen",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1400, 300],
+      "position": [1360, 200],
       "notes": "HTML-Report mit Ampel-System (Konform/Warnung/Kritisch)."
     },
     {
       "parameters": {
-        "jsCode": "const { stats } = $input.first().json;\nconst now = new Date().toLocaleString('de-DE');\nconst html = `<!DOCTYPE html><html lang=\"de\"><head><meta charset=\"UTF-8\"><title>Compliance OK</title></head>\n<body style=\"font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;padding:24px;\">\n<div style=\"max-width:600px;margin:0 auto;background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.08);overflow:hidden;\">\n<div style=\"background:linear-gradient(135deg,#003c71,#00a3e0);color:#fff;padding:28px 36px;\"><h1 style=\"font-size:24px;\">Compliance-Check: Alles OK</h1><div style=\"font-size:13px;opacity:.9;margin-top:4px;\">${now}</div></div>\n<div style=\"padding:36px;text-align:center;\"><div style=\"font-size:64px;margin-bottom:16px;\">&#9989;</div><div style=\"font-size:20px;color:#2e7d32;font-weight:600;\">Alle ${stats.totalEndpoints} Endpoints sind konform.</div><div style=\"font-size:14px;color:#888;margin-top:8px;\">Keine verbotene oder fehlende Pflicht-Software.</div></div>\n<div style=\"background:#fafbfc;padding:14px 36px;border-top:1px solid #e9ecef;font-size:12px;color:#888;text-align:center;\">baramundi come2gether 2026 Challenge</div>\n</div></body></html>`;\nreturn { json: { html } };\n"
+        "jsCode": "const { stats } = $input.first().json;\nconst now = new Date().toLocaleString('de-DE');\nconst html = '<!DOCTYPE html><html lang=\"de\"><head><meta charset=\"UTF-8\"><title>Compliance OK</title></head>' +\n'<body style=\"font-family:Segoe UI,Arial,sans-serif;background:#f0f2f5;padding:24px;\">' +\n'<div style=\"max-width:600px;margin:0 auto;background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.08);overflow:hidden;\">' +\n'<div style=\"background:linear-gradient(135deg,#003c71,#00a3e0);color:#fff;padding:28px 36px;\"><h1 style=\"font-size:24px;\">Compliance-Check: Alles OK</h1><div style=\"font-size:13px;opacity:.9;margin-top:4px;\">' + now + '</div></div>' +\n'<div style=\"padding:36px;text-align:center;\"><div style=\"font-size:64px;margin-bottom:16px;\">&#9989;</div><div style=\"font-size:20px;color:#2e7d32;font-weight:600;\">Alle ' + stats.totalEndpoints + ' Windows-Endpoints sind konform.</div><div style=\"font-size:14px;color:#888;margin-top:8px;\">Keine verbotene oder nicht genehmigte Software gefunden.</div></div>' +\n'<div style=\"background:#fafbfc;padding:14px 36px;border-top:1px solid #e9ecef;font-size:12px;color:#888;text-align:center;\">baramundi come2gether 2026 Challenge</div>' +\n'</div></body></html>';\nreturn { json: { html } };\n"
       },
       "id": "c2g02-0008-0001-0001-000000000009",
       "name": "Alles OK Meldung",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1400, 500],
-      "notes": "Kurze Bestaetigung wenn alles konform ist."
+      "position": [1360, 400],
+      "notes": "Kurze Bestätigung wenn alles konform ist."
     },
     {
       "parameters": { "html": "={{ $json.html }}", "options": {} },
@@ -144,7 +126,7 @@
       "name": "Report anzeigen",
       "type": "n8n-nodes-base.html",
       "typeVersion": 1.2,
-      "position": [1640, 300]
+      "position": [1580, 200]
     },
     {
       "parameters": { "html": "={{ $json.html }}", "options": {} },
@@ -152,20 +134,47 @@
       "name": "OK anzeigen",
       "type": "n8n-nodes-base.html",
       "typeVersion": 1.2,
-      "position": [1640, 500]
+      "position": [1580, 400]
     }
   ],
   "pinData": {},
   "connections": {
-    "Täglich 07:00": { "main": [[{ "node": "Windows Endpoints holen", "type": "main", "index": 0 }]] },
-    "Manueller Start": { "main": [[{ "node": "Windows Endpoints holen", "type": "main", "index": 0 }]] },
-    "Windows Endpoints holen": { "main": [[{ "node": "Endpoints + Software verknüpfen", "type": "main", "index": 0 }]] },
-    "Installierte Software holen": { "main": [[{ "node": "Endpoints + Software verknüpfen", "type": "main", "index": 1 }]] },
-    "Endpoints + Software verknüpfen": { "main": [[{ "node": "Compliance prüfen", "type": "main", "index": 0 }]] },
-    "Compliance prüfen": { "main": [[{ "node": "Violations vorhanden?", "type": "main", "index": 0 }]] },
-    "Violations vorhanden?": { "main": [[{ "node": "Compliance-Report erzeugen", "type": "main", "index": 0 }], [{ "node": "Alles OK Meldung", "type": "main", "index": 0 }]] },
-    "Compliance-Report erzeugen": { "main": [[{ "node": "Report anzeigen", "type": "main", "index": 0 }]] },
-    "Alles OK Meldung": { "main": [[{ "node": "OK anzeigen", "type": "main", "index": 0 }]] }
+    "Manueller Start": {
+      "main": [[
+        { "node": "Windows Endpoints holen", "type": "main", "index": 0 }
+      ]]
+    },
+    "Windows Endpoints holen": {
+      "main": [[
+        { "node": "Installierte Software holen", "type": "main", "index": 0 }
+      ]]
+    },
+    "Installierte Software holen": {
+      "main": [[
+        { "node": "Compliance prüfen", "type": "main", "index": 0 }
+      ]]
+    },
+    "Compliance prüfen": {
+      "main": [[
+        { "node": "Violations vorhanden?", "type": "main", "index": 0 }
+      ]]
+    },
+    "Violations vorhanden?": {
+      "main": [
+        [{ "node": "Compliance-Report erzeugen", "type": "main", "index": 0 }],
+        [{ "node": "Alles OK Meldung", "type": "main", "index": 0 }]
+      ]
+    },
+    "Compliance-Report erzeugen": {
+      "main": [[
+        { "node": "Report anzeigen", "type": "main", "index": 0 }
+      ]]
+    },
+    "Alles OK Meldung": {
+      "main": [[
+        { "node": "OK anzeigen", "type": "main", "index": 0 }
+      ]]
+    }
   },
   "active": false,
   "settings": { "executionOrder": "v1" },

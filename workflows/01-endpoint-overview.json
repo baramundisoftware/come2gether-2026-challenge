@@ -2,6 +2,18 @@
   "name": "Challenge 01: Endpoint-Übersicht",
   "nodes": [
     {
+      "parameters": {
+        "content": "## Workflow 1: Endpoint-Übersicht\n\n**Schwierigkeit:** Einfach\n\nDieser Workflow holt alle verwalteten Endpoints (Windows, Linux, Mac)\nüber den baramundi Connector und erzeugt eine HTML-Übersichtsseite\nmit farbigen Kacheln und einer sortierbaren Tabelle.\n\n**Ablauf:**\n1. Manual Trigger → Start per Klick\n2. Drei Endpoint-Nodes parallel (Windows, Linux, Mac)\n3. Merge → Alle Ergebnisse zusammenführen\n4. Code-Node → HTML mit baramundi Branding erzeugen\n5. HTML-Node → Ergebnis anzeigen\n\n**Lerneffekt:** n8n Grundlagen, Connector-Nutzung, parallele\nAusführung, Merge-Node, HTML-Templating in Code-Nodes",
+        "width": 400,
+        "height": 380
+      },
+      "id": "c2g01-note-0001-0001-000000000000",
+      "name": "Beschreibung",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-200, 60]
+    },
+    {
       "parameters": {},
       "id": "c2g01-0001-0001-0001-000000000001",
       "name": "Start",

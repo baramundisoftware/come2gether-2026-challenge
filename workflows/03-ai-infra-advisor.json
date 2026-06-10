@@ -2,6 +2,18 @@
   "name": "Challenge 03: KI-Infrastruktur-Berater",
   "nodes": [
     {
+      "parameters": {
+        "content": "## Workflow 3: KI-Infrastruktur-Berater\n\n**Schwierigkeit:** Fortgeschritten\n**Benötigt:** Anthropic API Key\n\nClaude AI Agent analysiert die gesamte Infrastruktur über\ndrei MCP-Server und erstellt einen Gesundheitsbericht.\n\n**Ablauf:**\n1. Manual Trigger → Start per Klick\n2. AI Agent (Claude) erhält einen Analyse-Prompt\n3. Der Agent entscheidet autonom, welche MCP-Tools er nutzt:\n   - **MCP: Endpoints** (47 Tools) — Endpoint-Daten\n   - **MCP: Jobs** (24 Tools) — Job-Status\n   - **MCP: Compliance** (8 Tools) — Schwachstellen\n4. Code-Node → Agent-Antwort als HTML formatieren\n5. HTML-Node → Bericht anzeigen\n\n**Lerneffekt:** KI-Agenten, MCP-Protokoll, Tool-Use,\nautonome Entscheidungsfindung, Prompt-Engineering\n\n⚠️ Ohne ANTHROPIC_API_KEY in .env wird dieser\nWorkflow nicht funktionieren.",
+        "width": 420,
+        "height": 440
+      },
+      "id": "c2g03-note-0001-0001-000000000000",
+      "name": "Beschreibung",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-240, 60]
+    },
+    {
       "parameters": {},
       "id": "c2g03-0001-0001-0001-000000000001",
       "name": "Start",
