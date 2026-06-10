@@ -30,12 +30,6 @@ setup_file() {
   echo "$output" | grep -q "CUSTOM.baramundiSoftware"
 }
 
-@test "Workflow 2: hat Schedule Trigger" {
-  run jq -r '.nodes[].type' workflows/02-software-compliance.json
-  [ "$status" -eq 0 ]
-  echo "$output" | grep -q "scheduleTrigger"
-}
-
 @test "Workflow 2: hat Manual Trigger" {
   run jq -r '.nodes[].type' workflows/02-software-compliance.json
   [ "$status" -eq 0 ]

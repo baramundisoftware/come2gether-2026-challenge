@@ -4,7 +4,8 @@
 # Phase B: GHCR-Images (dann entfallen die build-* Targets)
 
 # ── Compose-Kommando (V1 oder V2) ─────────────────────────
-COMPOSE := $(shell command -v docker-compose 2>/dev/null || echo "$(COMPOSE)")
+COMPOSE := $(shell command -v docker-compose 2>/dev/null || echo "docker compose")
+COMPOSE := $(COMPOSE) -p c2g
 
 # ── Pfade zu Geschwister-Repos ─────────────────────────────
 MOCK_DIR    := ../bConnect-Mock
