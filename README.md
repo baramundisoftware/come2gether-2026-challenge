@@ -2,25 +2,39 @@
 
 **Automatisiere eine wiederkehrende IT-Admin-Aufgabe mit n8n und/oder MCP mit der bConnect API.**
 
-Dieses Repo liefert eine schluesselfertige Docker-Umgebung mit allem was du brauchst:
+Dieses Repo liefert eine schlüsselfertige Docker-Umgebung mit allem was du brauchst:
 
 - **n8n** mit vorinstalliertem baramundi Connector (6 Nodes, 229 Operationen)
 - **bConnect Mock** (simulierte bMS REST API mit realistischen Testdaten)
-- **MCP Gateway** (13 KI-faehige MCP-Server fuer Claude und andere AI Agents)
+- **MCP Gateway** (13 KI-fähige MCP-Server für Claude und andere AI Agents)
 - **3 Beispiel-Workflows** als Inspiration und Startpunkt
 
 ## Quick Start
 
 ```bash
-git clone git@github.com:baramundisoftware/c2g-2026-challenge.git
+git clone https://github.com/baramundisoftware/c2g-2026-challenge.git
 cd c2g-2026-challenge
-cp .env.example .env
+```
+
+Konfiguration anlegen:
+
+| Plattform | Befehl |
+|-----------|--------|
+| **Linux / Mac** | `cp .env.example .env` |
+| **Windows (PowerShell)** | `Copy-Item .env.example .env` |
+| **Windows (CMD)** | `copy .env.example .env` |
+
+Dann starten:
+
+```bash
 docker compose up -d
 ```
 
-Oeffne http://localhost:5678 — Login: `demo` / `baramundi`
+Öffne http://localhost:5678 — Login: `demo` / `baramundi`
 
-> **Hinweis:** Falls dein System `docker-compose` (V1) nutzt, ersetze
+> **Voraussetzung:** [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+> (Windows / Mac) oder Docker Engine + Docker Compose (Linux).
+> Falls dein Linux-System nur `docker-compose` (V1) hat, ersetze
 > `docker compose` durch `docker-compose` in allen Befehlen.
 
 ## Architektur
@@ -43,30 +57,30 @@ Oeffne http://localhost:5678 — Login: `demo` / `baramundi`
 
 ### Datenfluss
 
-1. **n8n** fuehrt Workflows aus und nutzt den **baramundi Connector** oder **MCP Client Tools**
+1. **n8n** führt Workflows aus und nutzt den **baramundi Connector** oder **MCP Client Tools**
 2. Der Connector spricht direkt mit der **bConnect REST API** (Mock oder Real)
 3. Die MCP Client Tools sprechen mit dem **MCP Gateway**, der die Anfragen an bConnect weiterleitet
-4. Der **bConnect Mock** simuliert eine vollstaendige baramundi Management Suite mit realistischen Daten
+4. Der **bConnect Mock** simuliert eine vollständige baramundi Management Suite mit realistischen Daten
 
 ## Die 3 Beispiel-Workflows
 
-### Workflow 1: Endpoint-Uebersicht (Einfach)
+### Workflow 1: Endpoint-Übersicht (Einfach)
 
 **Trigger:** Manuell | **Nodes:** 8
 
-Holt alle Endpoints (Windows, Linux, Mac) ueber den baramundi Connector,
-fuehrt sie zusammen und erzeugt eine HTML-Seite mit:
+Holt alle Endpoints (Windows, Linux, Mac) über den baramundi Connector,
+führt sie zusammen und erzeugt eine HTML-Seite mit:
 - Farbige Kacheln pro Endpoint-Typ (Zusammenfassung)
 - Tabelle mit Hostname, Typ, OS, IP, Benutzer, letzter Kontakt
-- baramundi Branding (Primaerblau #00a3e0, Dunkelblau #003c71)
+- baramundi Branding (Primärblau #00a3e0, Dunkelblau #003c71)
 
 **Lerneffekt:** n8n Grundlagen, Connector-Nutzung, Merge-Node, HTML-Templating
 
 ### Workflow 2: Software-Compliance (Mittel)
 
-**Trigger:** Schedule (taeglich) + Manuell | **Nodes:** 11
+**Trigger:** Schedule (täglich) + Manuell | **Nodes:** 11
 
-Prueft installierte Software gegen konfigurierbare Regeln:
+Prüft installierte Software gegen konfigurierbare Regeln:
 - **Allowlist:** Erlaubte Standard-Software (Office, Chrome, Teams, ...)
 - **Blocklist:** Verbotene Software (Torrent, Spiele, Remote-Tools)
 - **Pflicht-Software:** Muss installiert sein (Office, Chrome)
@@ -83,9 +97,9 @@ bedingte Logik (IF-Node), praxisnahe IT-Compliance
 **Trigger:** Manuell | **Nodes:** 8 | **Braucht:** Anthropic API Key
 
 Claude AI Agent mit drei MCP-Server-Anbindungen:
-- **MCP: Endpoints** — 47 Tools fuer Endpoint-Verwaltung
-- **MCP: Jobs** — 24 Tools fuer Job-Management
-- **MCP: Compliance** — 8 Tools fuer Compliance und Schwachstellen
+- **MCP: Endpoints** — 47 Tools für Endpoint-Verwaltung
+- **MCP: Jobs** — 24 Tools für Job-Management
+- **MCP: Compliance** — 8 Tools für Compliance und Schwachstellen
 
 Der Agent entscheidet autonom, welche Tools er aufruft, und erzeugt
 einen strukturierten Infrastruktur-Gesundheitsbericht.
@@ -94,7 +108,7 @@ einen strukturierten Infrastruktur-Gesundheitsbericht.
 
 ## Mock oder echtes bConnect?
 
-Die `.env`-Datei steuert das Ziel. Default ist der Mock — kein echtes bMS noetig.
+Die `.env`-Datei steuert das Ziel. Default ist der Mock — kein echtes bMS nötig.
 
 ```env
 # Mock (Default)
@@ -105,7 +119,7 @@ BCONNECT_BASE_URL=http://bconnect-mock:3433/bconnect
 # BCONNECT_API_KEY=dein-api-key
 ```
 
-Nach Aenderung: `docker compose down -v && docker compose up -d`
+Nach Änderung: `docker compose down -v && docker compose up -d`
 
 ### Mock-Daten
 
@@ -123,7 +137,7 @@ Der bConnect Mock liefert realistische Testdaten:
 
 ## KI-Workflow (Workflow 3)
 
-Fuer den KI-Workflow brauchst du einen Anthropic API Key:
+Für den KI-Workflow brauchst du einen Anthropic API Key:
 
 1. Key erstellen: https://console.anthropic.com/
 2. In `.env` eintragen: `ANTHROPIC_API_KEY=dein-key-hier`
@@ -150,7 +164,7 @@ c2g-2026-challenge/
 ├── Makefile                           # build, test, clean
 │
 ├── workflows/
-│   ├── 01-endpoint-overview.json      # Einfach: Endpoint-HTML-Uebersicht
+│   ├── 01-endpoint-overview.json      # Einfach: Endpoint-HTML-Übersicht
 │   ├── 02-software-compliance.json    # Mittel: Compliance mit Ampel-Report
 │   └── 03-ai-infra-advisor.json       # KI: Claude + 3 MCP Server
 │
@@ -160,7 +174,7 @@ c2g-2026-challenge/
 │   └── TIPPS.md                       # Hilfreiche Links und Tipps
 │
 ├── branding/
-│   ├── baramundi-logo.svg             # Logo fuer HTML-Reports
+│   ├── baramundi-logo.svg             # Logo für HTML-Reports
 │   └── styles.css                     # baramundi CSS-Farbschema
 │
 └── tests/                             # BATS-Testsuite (45 Tests)
@@ -179,18 +193,23 @@ c2g-2026-challenge/
 
 **Container starten nicht?**
 ```bash
-docker compose logs -f        # Logs pruefen
+docker compose logs -f        # Logs prüfen
 docker compose down -v         # Neustart mit frischen Volumes
 docker compose up -d
 ```
 
 **n8n zeigt keine Workflows?**
 - Die Workflows werden beim ersten Start automatisch importiert (Seed-Mechanismus)
-- Bei Problemen: `docker compose down -v && docker compose up -d` (Volumes zuruecksetzen)
+- Bei Problemen: `docker compose down -v && docker compose up -d` (Volumes zurücksetzen)
 
-**MCP-Tools nicht verfuegbar?**
-- Gateway-Health pruefen: `curl http://localhost:3001/health`
-- MCP-URLs in n8n muessen `http://mcp-gateway:3001/...` sein (Docker-Netzwerk)
+**MCP-Tools nicht verfügbar?**
+- Gateway-Health prüfen: http://localhost:3001/health im Browser öffnen
+- MCP-URLs in n8n müssen `http://mcp-gateway:3001/...` sein (Docker-Netzwerk)
+
+**Windows: Ports blockiert?**
+- Stelle sicher, dass die Ports 3433, 3001 und 5678 frei sind
+- Windows Firewall oder VPN können Docker-Ports blockieren
+- In Docker Desktop: Settings → Resources → prüfe ob genug RAM zugewiesen ist (mind. 4 GB)
 
 ## Lizenz
 
