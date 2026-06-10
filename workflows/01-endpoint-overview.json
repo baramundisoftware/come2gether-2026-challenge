@@ -1,11 +1,187 @@
 {
   "name": "Challenge 01: Endpoint-Uebersicht",
-  "nodes": [],
-  "connections": {},
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "c2g01-0001-0001-0001-000000000001",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [180, 300],
+      "notes": "Klicke 'Test workflow' um die Endpoint-Uebersicht zu generieren."
+    },
+    {
+      "parameters": {
+        "resource": "endpoint",
+        "operation": "getMany",
+        "returnAll": true,
+        "bmsVersion": "26R1"
+      },
+      "id": "c2g01-0002-0001-0001-000000000002",
+      "name": "Windows Endpoints",
+      "type": "CUSTOM.baramundiEndpoint",
+      "typeVersion": 1,
+      "position": [420, 160],
+      "credentials": {
+        "bconnectApi": {
+          "id": "bconnectdefault0",
+          "name": "bConnect Mock (default)"
+        }
+      },
+      "notes": "Holt alle Windows-Endpoints aus der bConnect API.\nResource: endpoint | Operation: getMany | returnAll: true"
+    },
+    {
+      "parameters": {
+        "resource": "endpoint",
+        "operation": "getMany",
+        "returnAll": true,
+        "bmsVersion": "26R1",
+        "options": {}
+      },
+      "id": "c2g01-0003-0001-0001-000000000003",
+      "name": "Linux Endpoints",
+      "type": "CUSTOM.baramundiEndpoint",
+      "typeVersion": 1,
+      "position": [420, 340],
+      "credentials": {
+        "bconnectApi": {
+          "id": "bconnectdefault0",
+          "name": "bConnect Mock (default)"
+        }
+      },
+      "notes": "Holt alle Linux-Endpoints aus der bConnect API."
+    },
+    {
+      "parameters": {
+        "resource": "endpoint",
+        "operation": "getMany",
+        "returnAll": true,
+        "bmsVersion": "26R1",
+        "options": {}
+      },
+      "id": "c2g01-0004-0001-0001-000000000004",
+      "name": "Mac Endpoints",
+      "type": "CUSTOM.baramundiEndpoint",
+      "typeVersion": 1,
+      "position": [420, 520],
+      "credentials": {
+        "bconnectApi": {
+          "id": "bconnectdefault0",
+          "name": "bConnect Mock (default)"
+        }
+      },
+      "notes": "Holt alle Mac-Endpoints aus der bConnect API."
+    },
+    {
+      "parameters": {
+        "mode": "append",
+        "options": {}
+      },
+      "id": "c2g01-0005-0001-0001-000000000005",
+      "name": "Alle zusammenfuehren",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [660, 240],
+      "notes": "Fuegt Windows-, Linux- und Mac-Endpoints zu einer Liste zusammen."
+    },
+    {
+      "parameters": {
+        "mode": "append",
+        "options": {}
+      },
+      "id": "c2g01-0005b-001-0001-000000000006",
+      "name": "Merge mit Mac",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [860, 340],
+      "notes": "Fuegt Mac-Endpoints zur kombinierten Liste hinzu."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Endpoint-Uebersicht HTML-Generator\n// baramundi come2gether 2026 Challenge\n\nconst endpoints = $input.all();\n\nconst data = endpoints.map(item => ({\n  displayName: item.json.displayName || item.json.hostName || 'Unbekannt',\n  type: item.json.endpointType || item.json.type || 'Unbekannt',\n  os: item.json.operatingSystem || 'Unbekannt',\n  lastSeen: item.json.lastSeen || 'Nie',\n  ip: item.json.primaryIP || item.json.primaryIpAddress || '-',\n  user: item.json.primaryUser || '-',\n  domain: item.json.domain || '-'\n}));\n\n// Zaehler pro Typ\nconst typeCounts = {};\ndata.forEach(ep => {\n  const t = ep.type.replace('Endpoint', '');\n  typeCounts[t] = (typeCounts[t] || 0) + 1;\n});\n\n// Typ-Farben\nconst typeColors = {\n  'Windows': { bg: '#e3f2fd', border: '#1976d2', icon: '\\uD83D\\uDDA5\\uFE0F' },\n  'Linux':   { bg: '#fff3e0', border: '#f57c00', icon: '\\uD83D\\uDC27' },\n  'Mac':     { bg: '#f5f5f5', border: '#757575', icon: '\\uD83C\\uDF4E' },\n  'Android': { bg: '#e8f5e9', border: '#4caf50', icon: '\\uD83E\\uDD16' },\n  'iOS':     { bg: '#e1f5fe', border: '#03a9f4', icon: '\\uD83D\\uDCF1' },\n  'Network': { bg: '#f3e5f5', border: '#9c27b0', icon: '\\uD83C\\uDF10' }\n};\n\nconst now = new Date().toLocaleString('de-DE', {\n  year: 'numeric', month: '2-digit', day: '2-digit',\n  hour: '2-digit', minute: '2-digit'\n});\n\n// Kacheln\nconst tiles = Object.entries(typeCounts).map(([type, count]) => {\n  const c = typeColors[type] || { bg: '#eceff1', border: '#90a4ae', icon: '\\uD83D\\uDCBB' };\n  return `<div style=\"background:${c.bg};border-left:4px solid ${c.border};padding:16px 20px;border-radius:6px;min-width:120px;\">\n    <div style=\"font-size:28px;font-weight:700;color:${c.border};\">${count}</div>\n    <div style=\"font-size:13px;color:#555;margin-top:4px;\">${c.icon} ${type}</div>\n  </div>`;\n}).join('');\n\n// Tabellenzeilen\nconst rows = data.map(ep => {\n  const typeName = ep.type.replace('Endpoint', '');\n  const c = typeColors[typeName] || { bg: '#eceff1', border: '#90a4ae' };\n  return `<tr>\n    <td style=\"font-weight:500;\">${ep.displayName}</td>\n    <td><span style=\"background:${c.bg};color:${c.border};padding:3px 10px;border-radius:4px;font-size:12px;font-weight:600;\">${typeName}</span></td>\n    <td>${ep.os}</td>\n    <td><code style=\"background:#f5f5f5;padding:2px 6px;border-radius:3px;font-size:13px;\">${ep.ip}</code></td>\n    <td>${ep.user}</td>\n    <td style=\"font-size:13px;color:#666;\">${ep.lastSeen}</td>\n  </tr>`;\n}).join('');\n\nconst html = `<!DOCTYPE html>\n<html lang=\"de\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Endpoint-Uebersicht - baramundi</title>\n  <style>\n    * { margin:0; padding:0; box-sizing:border-box; }\n    body { font-family:'Segoe UI',Arial,sans-serif; background:#f0f2f5; padding:24px; }\n    .container { max-width:1400px; margin:0 auto; background:#fff; border-radius:10px; box-shadow:0 2px 12px rgba(0,0,0,0.08); overflow:hidden; }\n    .header { background:linear-gradient(135deg,#003c71 0%,#00a3e0 100%); color:#fff; padding:28px 36px; }\n    .header h1 { font-size:24px; font-weight:700; }\n    .header .sub { font-size:13px; opacity:0.9; margin-top:4px; }\n    .tiles { display:flex; gap:16px; flex-wrap:wrap; padding:24px 36px; background:#fafbfc; border-bottom:1px solid #e9ecef; }\n    .total { background:#003c71; color:#fff; padding:16px 20px; border-radius:6px; min-width:120px; }\n    .total .num { font-size:28px; font-weight:700; }\n    .total .lbl { font-size:13px; opacity:0.85; margin-top:4px; }\n    table { width:100%; border-collapse:collapse; font-size:14px; }\n    thead tr { background:#003c71; color:#fff; }\n    th { padding:12px 16px; text-align:left; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; font-weight:600; }\n    td { padding:10px 16px; border-bottom:1px solid #e9ecef; }\n    tbody tr:hover { background:#f8f9fa; }\n    .footer { background:#fafbfc; padding:14px 36px; border-top:1px solid #e9ecef; font-size:12px; color:#888; text-align:center; }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <div class=\"header\">\n      <h1>Endpoint-Uebersicht</h1>\n      <div class=\"sub\">baramundi Management Suite &mdash; Generiert: ${now}</div>\n    </div>\n    <div class=\"tiles\">\n      <div class=\"total\"><div class=\"num\">${data.length}</div><div class=\"lbl\">Gesamt</div></div>\n      ${tiles}\n    </div>\n    <div style=\"padding:0 36px 36px;overflow-x:auto;\">\n      <table>\n        <thead><tr><th>Hostname</th><th>Typ</th><th>Betriebssystem</th><th>IP-Adresse</th><th>Benutzer</th><th>Zuletzt gesehen</th></tr></thead>\n        <tbody>${rows}</tbody>\n      </table>\n    </div>\n    <div class=\"footer\">baramundi come2gether 2026 Challenge &mdash; Workflow 01: Endpoint-Uebersicht</div>\n  </div>\n</body>\n</html>`;\n\nreturn { json: { html } };\n"
+      },
+      "id": "c2g01-0006-0001-0001-000000000007",
+      "name": "HTML-Report erzeugen",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1080, 340],
+      "notes": "Erzeugt eine HTML-Seite mit:\n- baramundi Farbschema (#00a3e0 Primaerblau, #003c71 Dunkelblau)\n- Zusammenfassung als farbige Kacheln pro Endpoint-Typ\n- Sortierbare Tabelle mit Hostname, Typ, OS, IP, Benutzer, letzter Kontakt"
+    },
+    {
+      "parameters": {
+        "html": "={{ $json.html }}",
+        "options": {}
+      },
+      "id": "c2g01-0007-0001-0001-000000000008",
+      "name": "HTML anzeigen",
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [1300, 340],
+      "notes": "Zeigt den HTML-Report direkt in der n8n-Oberflaeche an."
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          { "node": "Windows Endpoints", "type": "main", "index": 0 },
+          { "node": "Linux Endpoints", "type": "main", "index": 0 },
+          { "node": "Mac Endpoints", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Windows Endpoints": {
+      "main": [
+        [
+          { "node": "Alle zusammenfuehren", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Linux Endpoints": {
+      "main": [
+        [
+          { "node": "Alle zusammenfuehren", "type": "main", "index": 1 }
+        ]
+      ]
+    },
+    "Alle zusammenfuehren": {
+      "main": [
+        [
+          { "node": "Merge mit Mac", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Mac Endpoints": {
+      "main": [
+        [
+          { "node": "Merge mit Mac", "type": "main", "index": 1 }
+        ]
+      ]
+    },
+    "Merge mit Mac": {
+      "main": [
+        [
+          { "node": "HTML-Report erzeugen", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "HTML-Report erzeugen": {
+      "main": [
+        [
+          { "node": "HTML anzeigen", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "active": false,
   "settings": {
     "executionOrder": "v1"
   },
+  "versionId": "00000000-0000-0000-0000-000000000000",
   "meta": {
-    "description": "Einfacher Workflow: Alle Endpoints abrufen und als HTML-Seite mit baramundi Branding darstellen."
-  }
+    "instanceId": "c2g-2026-challenge"
+  },
+  "id": "c2g-2026-wf-01",
+  "tags": []
 }

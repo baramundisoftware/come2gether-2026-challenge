@@ -5,7 +5,7 @@ load helpers/setup
 
 setup_file() {
   # Stelle sicher, dass Container laufen
-  docker compose up -d 2>/dev/null || true
+  docker-compose up -d 2>/dev/null || true
   wait_for_all_healthy 180
   bootstrap_n8n_api_key
 }
@@ -74,7 +74,7 @@ setup_file() {
 }
 
 @test "kein Container hat Status exited" {
-  run docker compose ps --format '{{.State}}'
+  run docker-compose ps
   [ "$status" -eq 0 ]
-  ! echo "$output" | grep -q "exited"
+  ! echo "$output" | grep -qi "exit"
 }

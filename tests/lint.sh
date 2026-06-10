@@ -68,6 +68,59 @@ else
 fi
 
 echo ""
+echo "=== Workflow-JSON Deep-Scan (Credentials, Passwort-Felder) ==="
+wf_deep_fail=0
+for f in workflows/*.json; do
+  [ -f "$f" ] || continue
+  # Pruefe auf Authorization-Header in Workflow-Nodes
+  if jq -r '.. | strings' "$f" 2>/dev/null | grep -qiE '(Authorization:\s*(Basic|Bearer)|password=|X-Api-Key:\s*[a-zA-Z0-9]{10,})'; then
+    echo "FAIL: $f enthaelt hartcodierte Auth-Header oder Passwoerter"
+    wf_deep_fail=$((wf_deep_fail+1))
+  fi
+  # Pruefe ob Credential-IDs echte IDs statt Platzhalter enthalten
+  real_cred_ids=$(jq -r '.. | .bconnectApi? // empty | .id' "$f" 2>/dev/null | grep -v 'bconnectdefault0' | grep -v '^$' | grep -v 'null' || true)
+  if [ -n "$real_cred_ids" ]; then
+    echo "WARN: $f referenziert unbekannte Credential-ID: $real_cred_ids"
+  fi
+done
+if [ "$wf_deep_fail" -gt 0 ]; then
+  errors=$((errors+wf_deep_fail))
+else
+  echo "  OK: Keine hartcodierten Credentials"
+fi
+
+echo ""
+echo "=== Keine toten Links in Markdown ==="
+md_link_fail=0
+for f in README.md challenge/*.md; do
+  [ -f "$f" ] || continue
+  # Relative Links pruefen
+  while IFS= read -r link; do
+    [ -z "$link" ] && continue
+    if [ ! -e "$link" ]; then
+      echo "FAIL: $f verlinkt auf nicht existierende Datei: $link"
+      md_link_fail=$((md_link_fail+1))
+    fi
+  done < <(grep -oP '\[.*?\]\(\K[^)]+' "$f" 2>/dev/null | grep -v '^http' | grep -v '^#' || true)
+done
+if [ "$md_link_fail" -gt 0 ]; then
+  errors=$((errors+md_link_fail))
+else
+  echo "  OK: Keine toten Links"
+fi
+
+echo ""
+echo "=== Kein TODO/TBD/FIXME in Dokumentation ==="
+if grep -rEi '(TODO|TBD|FIXME|XXX|HACK)' \
+     --include='*.md' \
+     . 2>/dev/null | grep -v '.git/' | grep -v 'node_modules/' | grep -v 'lint.sh'; then
+  echo "FAIL: TODO/TBD/FIXME gefunden!"
+  errors=$((errors+1))
+else
+  echo "  OK: Keine offenen TODOs"
+fi
+
+echo ""
 echo "=== Keine internen Referenzen ==="
 if grep -rEi '(bms-win22srv|/home/ansible/|\.mshome\.net)' \
      --include='*.yml' --include='*.yaml' --include='*.json' \

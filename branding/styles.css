@@ -1,0 +1,109 @@
+/* baramundi come2gether 2026 Challenge — CSS Branding
+ *
+ * Farben aus dem baramundi Corporate Design:
+ *   Primaerblau:  #00a3e0
+ *   Dunkelblau:   #003c71
+ *   Weiss:        #ffffff
+ *   Hellgrau:     #f5f5f5
+ *   Akzent:       #f7941d (Orange)
+ */
+
+:root {
+  --bms-primary: #00a3e0;
+  --bms-dark: #003c71;
+  --bms-white: #ffffff;
+  --bms-light: #f5f5f5;
+  --bms-accent: #f7941d;
+  --bms-success: #2e7d32;
+  --bms-warning: #f57f17;
+  --bms-danger: #c62828;
+  --bms-text: #333333;
+  --bms-muted: #888888;
+  --bms-border: #e9ecef;
+  --bms-font: 'Segoe UI', Arial, sans-serif;
+}
+
+/* Base */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: var(--bms-font);
+  background: #f0f2f5;
+  color: var(--bms-text);
+  padding: 24px;
+}
+
+/* Container */
+.bms-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  background: var(--bms-white);
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+/* Header */
+.bms-header {
+  background: linear-gradient(135deg, var(--bms-dark) 0%, var(--bms-primary) 100%);
+  color: var(--bms-white);
+  padding: 28px 36px;
+}
+.bms-header h1 { font-size: 24px; font-weight: 700; }
+.bms-header .subtitle { font-size: 13px; opacity: 0.9; margin-top: 4px; }
+
+/* Summary Tiles */
+.bms-tiles {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 24px 36px;
+  background: #fafbfc;
+  border-bottom: 1px solid var(--bms-border);
+}
+.bms-tile {
+  padding: 16px 20px;
+  border-radius: 6px;
+  min-width: 120px;
+}
+.bms-tile .num { font-size: 28px; font-weight: 700; }
+.bms-tile .lbl { font-size: 13px; margin-top: 4px; }
+
+/* Tables */
+.bms-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.bms-table thead tr { background: var(--bms-dark); color: var(--bms-white); }
+.bms-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+.bms-table td { padding: 10px 16px; border-bottom: 1px solid var(--bms-border); }
+.bms-table tbody tr:hover { background: var(--bms-light); }
+
+/* Badges */
+.bms-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.bms-badge--ok      { background: #e8f5e9; color: var(--bms-success); border-left: 3px solid var(--bms-success); }
+.bms-badge--warning  { background: #fff8e1; color: var(--bms-warning); border-left: 3px solid var(--bms-warning); }
+.bms-badge--critical { background: #fce4ec; color: var(--bms-danger);  border-left: 3px solid var(--bms-danger); }
+
+/* Sections */
+.bms-section { padding: 24px 36px; }
+.bms-section h2 { font-size: 18px; color: var(--bms-dark); margin-bottom: 16px; }
+
+/* Footer */
+.bms-footer {
+  background: #fafbfc;
+  padding: 14px 36px;
+  border-top: 1px solid var(--bms-border);
+  font-size: 12px;
+  color: var(--bms-muted);
+  text-align: center;
+}

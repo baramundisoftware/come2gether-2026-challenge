@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 40" width="200" height="40">
+  <!-- baramundi Textlogo (vereinfacht, kein geschuetztes Artwork) -->
+  <rect width="200" height="40" rx="4" fill="#003c71"/>
+  <text x="16" y="27" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#ffffff">baramundi</text>
+  <text x="142" y="27" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="400" fill="#00a3e0">bMS</text>
+</svg>

@@ -3,6 +3,9 @@
 # Phase A: Lokaler Build aus Geschwister-Repos
 # Phase B: GHCR-Images (dann entfallen die build-* Targets)
 
+# ── Compose-Kommando (V1 oder V2) ─────────────────────────
+COMPOSE := $(shell command -v docker-compose 2>/dev/null || echo "$(COMPOSE)")
+
 # ── Pfade zu Geschwister-Repos ─────────────────────────────
 MOCK_DIR    := ../bConnect-Mock
 MCP_DIR     := ../bConnect-MCP
@@ -35,13 +38,13 @@ build-n8n:  ## n8n Demo Image bauen (inkl. Connector + Mock)
 # ── Run ────────────────────────────────────────────────────
 
 up: ## Container starten
-	docker compose up -d
+	$(COMPOSE) up -d
 
 down: ## Container stoppen
-	docker compose down
+	$(COMPOSE) down
 
 clean: ## Container + Volumes entfernen
-	docker compose down -v --remove-orphans
+	$(COMPOSE) down -v --remove-orphans
 
 # ── Tests ──────────────────────────────────────────────────
 
@@ -49,7 +52,7 @@ test-lint:  ## Statische Analyse (kein Docker noetig)
 	bash tests/lint.sh
 
 test-smoke: ## Container-Startup + Healthchecks
-	docker compose up -d
+	$(COMPOSE) up -d
 	bats tests/smoke.bats
 
 test-workflows: ## Workflow 1+2 ausfuehren und pruefen

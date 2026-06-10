@@ -3,11 +3,24 @@
   "nodes": [
     {
       "parameters": {},
-      "id": "placeholder-trigger",
-      "name": "Manual Trigger",
+      "id": "c2g03-0001-0001-0001-000000000001",
+      "name": "Start",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
-      "position": [240, 300]
+      "position": [180, 300],
+      "notes": "Klicke 'Test workflow' um den KI-Infrastruktur-Berater zu starten.\nDer AI Agent beantwortet die Frage im Prompt-Node automatisch."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Du bist ein erfahrener IT-Administrator-Assistent fuer die baramundi Management Suite. Nutze die verfuegbaren MCP-Tools um folgende Analyse durchzufuehren:\n\n1. Liste alle verwalteten Endpoints auf — wie viele gibt es, welche Typen (Windows, Linux, Mac)?\n2. Gibt es Endpoints, die seit ueber 30 Tagen nicht mehr gesehen wurden?\n3. Pruefe den Status der letzten Jobs — gibt es fehlgeschlagene?\n4. Gibt es offene Compliance-Violations oder Schwachstellen?\n\nFasse die Ergebnisse als strukturierten Infrastruktur-Gesundheitsbericht zusammen. Antworte auf Deutsch."
+      },
+      "id": "c2g03-0002-0001-0001-000000000002",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [440, 300],
+      "notes": "Der AI Agent erhaelt einen Prompt und entscheidet autonom, welche MCP-Tools\ner aufruft. Er hat Zugriff auf Endpoint-, Job- und Compliance-Daten.\n\nBeispiel-Prompts zum Ausprobieren:\n- \"Welche Endpoints haben kritische Schwachstellen?\"\n- \"Gibt es fehlgeschlagene Jobs in den letzten 24 Stunden?\"\n- \"Erstelle einen Gesundheitsbericht der Infrastruktur.\"\n- \"Welche Windows-Endpoints wurden seit 30 Tagen nicht gesehen?\""
     },
     {
       "parameters": {
@@ -15,20 +28,152 @@
           "__rl": true,
           "value": "claude-sonnet-4-20250514",
           "mode": "id"
+        },
+        "options": {
+          "maxTokensToSample": 4096
         }
       },
-      "id": "placeholder-claude",
+      "id": "c2g03-0003-0001-0001-000000000003",
       "name": "Claude",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.4,
-      "position": [340, 520]
+      "position": [300, 520],
+      "credentials": {
+        "anthropicApi": {
+          "id": "",
+          "name": "Anthropic API Key"
+        }
+      },
+      "notes": "Claude als KI-Modell fuer den Agenten.\n\nAPI-Key konfigurieren:\n1. Settings > Credentials > Add Credential\n2. 'Anthropic API' waehlen\n3. Key von console.anthropic.com einfuegen"
+    },
+    {
+      "parameters": {
+        "endpointUrl": "http://mcp-gateway:3001/endpoints/mcp",
+        "serverTransport": "httpStreamable",
+        "authentication": "none",
+        "include": "all",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "c2g03-0004-0001-0001-000000000004",
+      "name": "MCP: Endpoints",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [460, 520],
+      "notes": "47 Endpoint-Management-Tools:\nlist_endpoints, get_endpoint, search_endpoints,\nlist_windows_endpoints, list_logical_groups, etc."
+    },
+    {
+      "parameters": {
+        "endpointUrl": "http://mcp-gateway:3001/jobs/mcp",
+        "serverTransport": "httpStreamable",
+        "authentication": "none",
+        "include": "all",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "c2g03-0005-0001-0001-000000000005",
+      "name": "MCP: Jobs",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [620, 520],
+      "notes": "24 Job-Management-Tools:\nlist_job_definitions, create_job_instance,\nstart_job_instance, list_endpoint_job_instances, etc."
+    },
+    {
+      "parameters": {
+        "endpointUrl": "http://mcp-gateway:3001/compliance/mcp",
+        "serverTransport": "httpStreamable",
+        "authentication": "none",
+        "include": "all",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "c2g03-0006-0001-0001-000000000006",
+      "name": "MCP: Compliance",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [780, 520],
+      "notes": "8 Compliance-Tools:\nlist_compliance_rules, list_vulnerabilities,\nlist_detected_vulnerabilities, list_rule_violations, etc."
+    },
+    {
+      "parameters": {
+        "jsCode": "// HTML-Formatter fuer die Agent-Antwort\nconst agentOutput = $input.first().json.output || $input.first().json.text || JSON.stringify($input.first().json);\nconst now = new Date().toLocaleString('de-DE', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });\n\n// Einfaches Markdown-zu-HTML\nlet content = agentOutput\n  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')\n  .replace(/^### (.+)$/gm, '<h3 style=\"color:#003c71;margin:20px 0 8px;\">$1</h3>')\n  .replace(/^## (.+)$/gm, '<h2 style=\"color:#003c71;margin:24px 0 12px;font-size:20px;\">$1</h2>')\n  .replace(/^# (.+)$/gm, '<h1 style=\"color:#003c71;margin:24px 0 12px;\">$1</h1>')\n  .replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>')\n  .replace(/\\*(.+?)\\*/g, '<em>$1</em>')\n  .replace(/`(.+?)`/g, '<code style=\"background:#f5f5f5;padding:2px 6px;border-radius:3px;font-size:13px;\">$1</code>')\n  .replace(/^- (.+)$/gm, '<li style=\"margin:4px 0;\">$1</li>')\n  .replace(/(<li.*<\\/li>)/s, '<ul style=\"padding-left:20px;\">$1</ul>')\n  .replace(/\\n\\n/g, '</p><p style=\"margin:8px 0;line-height:1.6;\">')\n  .replace(/\\n/g, '<br>');\n\nconst html = `<!DOCTYPE html><html lang=\"de\"><head><meta charset=\"UTF-8\"><title>Infrastruktur-Berater</title></head>\n<body style=\"font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;padding:24px;\">\n<div style=\"max-width:1000px;margin:0 auto;background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.08);overflow:hidden;\">\n<div style=\"background:linear-gradient(135deg,#003c71,#00a3e0);color:#fff;padding:28px 36px;\">\n  <h1 style=\"font-size:24px;margin:0;\">KI-Infrastruktur-Berater</h1>\n  <div style=\"font-size:13px;opacity:.9;margin-top:4px;\">baramundi Management Suite &mdash; Claude AI Agent &mdash; ${now}</div>\n</div>\n<div style=\"padding:28px 36px;font-size:14px;color:#333;\">\n  <div style=\"background:#e3f2fd;border-left:4px solid #1976d2;padding:12px 16px;border-radius:4px;margin-bottom:20px;font-size:13px;color:#0d47a1;\">\n    Dieser Bericht wurde automatisch von einem Claude AI Agent erstellt, der ueber MCP-Tools auf Endpoint-, Job- und Compliance-Daten zugreift.\n  </div>\n  <p style=\"margin:8px 0;line-height:1.6;\">${content}</p>\n</div>\n<div style=\"background:#fafbfc;padding:14px 36px;border-top:1px solid #e9ecef;font-size:12px;color:#888;text-align:center;\">baramundi come2gether 2026 Challenge &mdash; Workflow 03: KI-Infrastruktur-Berater</div>\n</div></body></html>`;\n\nreturn { json: { html } };\n"
+      },
+      "id": "c2g03-0007-0001-0001-000000000007",
+      "name": "HTML formatieren",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [700, 300],
+      "notes": "Konvertiert die Agent-Antwort in einen formatierten\nHTML-Report mit baramundi Branding."
+    },
+    {
+      "parameters": { "html": "={{ $json.html }}", "options": {} },
+      "id": "c2g03-0008-0001-0001-000000000008",
+      "name": "Bericht anzeigen",
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [920, 300],
+      "notes": "Zeigt den KI-generierten Bericht in der n8n-Oberflaeche an."
     }
   ],
-  "connections": {},
-  "settings": {
-    "executionOrder": "v1"
+  "pinData": {},
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          { "node": "AI Agent", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Claude": {
+      "ai_languageModel": [
+        [
+          { "node": "AI Agent", "type": "ai_languageModel", "index": 0 }
+        ]
+      ]
+    },
+    "MCP: Endpoints": {
+      "ai_tool": [
+        [
+          { "node": "AI Agent", "type": "ai_tool", "index": 0 }
+        ]
+      ]
+    },
+    "MCP: Jobs": {
+      "ai_tool": [
+        [
+          { "node": "AI Agent", "type": "ai_tool", "index": 0 }
+        ]
+      ]
+    },
+    "MCP: Compliance": {
+      "ai_tool": [
+        [
+          { "node": "AI Agent", "type": "ai_tool", "index": 0 }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          { "node": "HTML formatieren", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "HTML formatieren": {
+      "main": [
+        [
+          { "node": "Bericht anzeigen", "type": "main", "index": 0 }
+        ]
+      ]
+    }
   },
-  "meta": {
-    "description": "KI-Workflow: Claude AI Agent mit 3 MCP-Servern (Endpoints, Jobs, Compliance) fuer natuerlichsprachliche Infrastruktur-Analyse."
-  }
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "versionId": "00000000-0000-0000-0000-000000000000",
+  "meta": { "instanceId": "c2g-2026-challenge" },
+  "id": "c2g-2026-wf-03",
+  "tags": []
 }
