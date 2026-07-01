@@ -1,4 +1,4 @@
-# c2g-2026-challenge — Makefile
+# come2gether-2026-challenge — Makefile
 #
 # Phase A: Lokaler Build aus Geschwister-Repos
 # Phase B: GHCR-Images (dann entfallen die build-* Targets)

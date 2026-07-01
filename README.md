@@ -12,8 +12,8 @@ Dieses Repo liefert eine schlüsselfertige Docker-Umgebung mit allem was du brau
 ## Quick Start
 
 ```bash
-git clone https://github.com/baramundisoftware/c2g-2026-challenge.git
-cd c2g-2026-challenge
+git clone https://github.com/baramundisoftware/come2gether-2026-challenge.git
+cd come2gether-2026-challenge
 ```
 
 Konfiguration anlegen:
@@ -160,7 +160,7 @@ Workflows 1 und 2 funktionieren auch ohne API Key.
 ## Projektstruktur
 
 ```
-c2g-2026-challenge/
+come2gether-2026-challenge/
 ├── README.md                          # Diese Datei
 ├── docker-compose.yml                 # 3 Services: Mock + Gateway + n8n
 ├── .env.example                       # Konfigurations-Vorlage
