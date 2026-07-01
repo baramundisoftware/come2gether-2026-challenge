@@ -10,7 +10,7 @@ set -eu
 N8N_URL="${N8N_URL:-http://localhost:5678}"
 OWNER_EMAIL="${N8N_OWNER_EMAIL:-demo@c2g.local}"
 OWNER_PASSWORD="${N8N_OWNER_PASSWORD:-Baramundi2026}"
-CLAUDE_MODEL="${CLAUDE_MODEL:-claude-opus-4-6}"
+CLAUDE_MODEL="${CLAUDE_MODEL:-claude-opus-4-8}"
 COOKIE=$(mktemp)
 
 log() { echo "[patch-model] $*"; }

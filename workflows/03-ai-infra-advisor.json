@@ -50,9 +50,9 @@
       "parameters": {
         "model": {
           "__rl": true,
-          "value": "claude-opus-4-6",
+          "value": "claude-opus-4-8",
           "mode": "id",
-          "cachedResultName": "claude-opus-4-7"
+          "cachedResultName": "claude-opus-4-8"
         },
         "options": {
           "maxTokensToSample": 4096

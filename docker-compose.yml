@@ -122,7 +122,7 @@ services:
       N8N_OWNER_EMAIL: ${N8N_OWNER_EMAIL:-demo@c2g.local}
       N8N_OWNER_PASSWORD: ${N8N_OWNER_PASSWORD:-Baramundi2026}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
-      CLAUDE_MODEL: ${CLAUDE_MODEL:-claude-opus-4-7}
+      CLAUDE_MODEL: ${CLAUDE_MODEL:-claude-opus-4-8}
     networks:
       - challenge-net
 
