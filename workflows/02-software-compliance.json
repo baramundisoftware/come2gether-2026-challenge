@@ -4,14 +4,14 @@
     {
       "parameters": {
         "content": "## Workflow 2: Software-Compliance\n\n**Schwierigkeit:** Mittel\n\nPrüft die installierte Software auf allen Windows-Endpoints\ngegen eine konfigurierbare Allowlist/Blocklist.\n\n**Ablauf:**\n1. Manual Trigger → Start per Klick\n2. Windows Endpoints holen (nur Windows, per endpointType)\n3. Installierte Software holen\n4. Code-Node → Compliance-Prüfung:\n   - Verbotene Software (Torrent, Spiele) → Kritisch\n   - Nicht genehmigte Software → Warnung\n   - Erlaubte Software → Konform\n5. IF-Node → Verzweigung nach Ergebnis\n6. HTML-Report mit Ampel-System oder \"Alles OK\"\n\n**Lerneffekt:** Daten-Enrichment, Allowlist-Logik,\nbedingte Verzweigung (IF-Node), HTML-Report-Generierung",
-        "width": 400,
-        "height": 400
+        "width": 460,
+        "height": 560
       },
       "id": "c2g02-note-0001-0001-000000000000",
       "name": "Beschreibung",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [-200, 100]
+      "position": [-300, 60]
     },
     {
       "parameters": {},

@@ -39,21 +39,24 @@ docker compose up -d
 
 ## Architektur
 
+```mermaid
+flowchart LR
+    subgraph compose["docker compose up"]
+        direction LR
+        n8n["n8n :5678<br/>+ baramundi Connector<br/>+ 3 Workflows"]
+        gateway["mcp-gateway :3001<br/>13 MCP-Server"]
+        mock["bconnect-mock :3433<br/>bConnect API (simuliert)"]
+    end
+
+    n8n -->|"baramundi Connector (REST)"| mock
+    n8n -->|"MCP Client Tools"| gateway
+    gateway -->|"REST"| mock
+
+    classDef svc fill:#e3f2fd,stroke:#003c71,stroke-width:2px,color:#003c71;
+    class n8n,gateway,mock svc;
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  docker compose up                                          │
-│                                                             │
-│  ┌──────────────┐   ┌──────────────┐   ┌────────────────┐  │
-│  │ bconnect-mock│   │ mcp-gateway  │   │     n8n        │  │
-│  │  :3433       │◄──│  :3001       │◄──│  :5678         │  │
-│  │              │   │              │   │                │  │
-│  │ bConnect API │   │ 13 MCP-      │   │ + Connector    │  │
-│  │ (simuliert)  │   │ Server       │   │ + 3 Workflows  │  │
-│  └──────────────┘   └──────────────┘   └────────────────┘  │
-│                                                             │
-│  Umschaltung Mock / Real: nur .env anpassen                 │
-└─────────────────────────────────────────────────────────────┘
-```
+
+> Umschaltung Mock / Real bConnect: nur `.env` anpassen.
 
 ### Datenfluss
 
