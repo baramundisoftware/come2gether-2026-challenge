@@ -15,7 +15,7 @@
     },
     {
       "parameters": {
-        "content": "## 🔑 Anthropic API Key + Model einrichten\n\n**Damit dieser Workflow funktioniert, brauchst du\neinen Anthropic API Key UND ein Model.**\n\n### API Key:\n1. Key erstellen: https://console.anthropic.com/\n2. Klicke auf den **Claude**-Node (unten)\n3. Bei \"Credential to connect with\":\n   → Wähle **Anthropic API (Challenge)** oder\n   → **Create New Credential**\n4. Nur das Feld **API Key** ausfüllen\n   (den Rest leer lassen)\n5. **Save** — \"Couldn't connect\" kann\n   ignoriert werden\n\n### Model:\n6. Im Claude-Node bei **Model** ein Model\n   aus der Dropdown-Liste wählen, z.B.:\n   - **Claude Sonnet 4.5** (schnell + günstig)\n   - **Claude Opus 4** (beste Qualität)\n7. Workflow **speichern** und **testen**\n\n💡 Workflows 1 und 2 funktionieren\nauch ohne API Key.",
+        "content": "## 🔑 Anthropic API Key + Model einrichten\n\n**Damit dieser Workflow funktioniert, brauchst du\neinen Anthropic API Key UND ein Model.**\n\n### API Key:\n1. Key erstellen: https://console.anthropic.com/\n2. Klicke auf den **Claude**-Node (unten)\n3. Bei \"Credential to connect with\":\n   → Wähle **Anthropic API (Challenge)** oder\n   → **Create New Credential**\n4. Nur das Feld **API Key** ausfüllen\n   (den Rest leer lassen)\n5. **Save** — \"Couldn't connect\" kann\n   ignoriert werden\n\n### Model:\n6. Im Claude-Node bei **Model** ein Model\n   aus der Dropdown-Liste wählen, z.B.:\n   - **Claude Sonnet 4.5** (schnell + günstig)\n   - **Claude Opus 4.8** (beste Qualität)\n7. Workflow **speichern** und **testen**\n\n💡 Workflows 1 und 2 funktionieren\nauch ohne API Key.",
         "width": 500,
         "height": 520
       },
