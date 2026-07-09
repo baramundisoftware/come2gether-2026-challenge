@@ -16,6 +16,26 @@ git clone https://github.com/baramundisoftware/come2gether-2026-challenge.git
 cd come2gether-2026-challenge
 ```
 
+### An der GitHub Container Registry anmelden (einmalig)
+
+Die Container-Images liegen **privat** in der GitHub Container Registry (GHCR).
+Melde dich einmal an, sonst bricht `docker compose up` mit `denied` ab:
+
+```bash
+gh auth refresh -s read:packages                                    # Scope einmalig ergaenzen
+gh auth token | docker login ghcr.io -u DEIN-GITHUB-USER --password-stdin
+```
+
+Ohne die `gh` CLI: Erstelle ein Personal Access Token (classic) mit Scope
+`read:packages` unter https://github.com/settings/tokens und nutze es als Passwort:
+
+```bash
+echo DEIN_TOKEN | docker login ghcr.io -u DEIN-GITHUB-USER --password-stdin
+```
+
+> **Voraussetzung:** Mitgliedschaft in der `baramundisoftware`-Organisation mit
+> **Read**-Zugriff auf die Pakete. Bei `denied` bitte den Challenge-Owner um Zugriff.
+
 Konfiguration anlegen:
 
 | Plattform | Befehl |

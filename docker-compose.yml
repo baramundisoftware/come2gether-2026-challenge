@@ -19,7 +19,7 @@ services:
 
   # ── bConnect Mock Server ──────────────────────────────────
   bconnect-mock:
-    image: ${MOCK_IMAGE:-c2g/bconnect-mock:dev}
+    image: ${MOCK_IMAGE:-ghcr.io/baramundisoftware/bconnect-mock:0.3.1}
     container_name: c2g-mock
     ports:
       - "3433:3433"
@@ -44,7 +44,7 @@ services:
 
   # ── MCP Gateway (13 bConnect MCP-Server) ──────────────────
   mcp-gateway:
-    image: ${GATEWAY_IMAGE:-c2g/mcp-gateway:dev}
+    image: ${GATEWAY_IMAGE:-ghcr.io/baramundisoftware/bconnect-mcp:latest}
     container_name: c2g-gateway
     ports:
       - "3001:3001"
@@ -76,7 +76,7 @@ services:
 
   # ── n8n + baramundi Connector ─────────────────────────────
   n8n:
-    image: ${N8N_IMAGE:-c2g/n8n-demo:dev}
+    image: ${N8N_IMAGE:-ghcr.io/baramundisoftware/come2gether-2026-challenge:latest}
     container_name: c2g-n8n
     ports:
       - "5678:5678"
