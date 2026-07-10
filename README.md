@@ -56,6 +56,9 @@ docker compose up -d
 > (Windows / Mac) oder Docker Engine + Docker Compose (Linux).
 > Falls dein Linux-System nur `docker-compose` (V1) hat, ersetze
 > `docker compose` durch `docker-compose` in allen Befehlen.
+>
+> 🐳 **Neu bei Docker?** Das [Docker-Tutorial für Einsteiger](docs/docker-tutorial.md)
+> erklärt in 10 Minuten alles, was du für diese Challenge brauchst.
 
 ## Architektur
 
@@ -176,6 +179,7 @@ Workflows 1 und 2 funktionieren auch ohne API Key.
 | [challenge/AUFGABE.md](challenge/AUFGABE.md) | Aufgabenstellung und Regeln |
 | [challenge/BEWERTUNG.md](challenge/BEWERTUNG.md) | Bewertungskriterien (100 Punkte) |
 | [challenge/TIPPS.md](challenge/TIPPS.md) | Hilfreiche Tipps, Node-Referenz, Fehlerbehebung |
+| [docs/docker-tutorial.md](docs/docker-tutorial.md) | Docker-Grundlagen für Einsteiger (10 Min.) |
 
 ## Projektstruktur
 
@@ -195,6 +199,9 @@ come2gether-2026-challenge/
 │   ├── AUFGABE.md                     # Aufgabenstellung
 │   ├── BEWERTUNG.md                   # Bewertungskriterien
 │   └── TIPPS.md                       # Hilfreiche Links und Tipps
+│
+├── docs/
+│   └── docker-tutorial.md            # Docker-Grundlagen für Einsteiger
 │
 ├── scripts/
 │   └── setup-owner.sh                 # Automatisches n8n Owner-Setup
