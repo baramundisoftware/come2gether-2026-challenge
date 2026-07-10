@@ -44,7 +44,7 @@ services:
 
   # ── MCP Gateway (13 bConnect MCP-Server) ──────────────────
   mcp-gateway:
-    image: ${GATEWAY_IMAGE:-ghcr.io/baramundisoftware/bconnect-mcp:latest}
+    image: ${GATEWAY_IMAGE:-ghcr.io/baramundisoftware/bconnect-mcp-gateway:edge}
     container_name: c2g-gateway
     ports:
       - "3001:3001"
