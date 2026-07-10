@@ -19,7 +19,7 @@ services:
 
   # ── bConnect Mock Server ──────────────────────────────────
   bconnect-mock:
-    image: ${MOCK_IMAGE:-ghcr.io/baramundisoftware/bconnect-mock:0.3.1}
+    image: ${MOCK_IMAGE:-ghcr.io/baramundisoftware/bconnect-mock:0.3.2}
     container_name: c2g-mock
     ports:
       - "3433:3433"
