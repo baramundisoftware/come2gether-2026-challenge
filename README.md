@@ -88,6 +88,25 @@ flowchart LR
 3. Die MCP Client Tools sprechen mit dem **MCP Gateway**, der die Anfragen an bConnect weiterleitet
 4. Der **bConnect Mock** simuliert eine vollständige baramundi Management Suite mit realistischen Daten
 
+## Images: ziehen oder selbst bauen
+
+Standardmäßig zieht `docker compose up -d` alle drei Images (Mock, Gateway, n8n)
+als fertige **Multi-Arch-Images (amd64 + arm64)** aus der GHCR — auch auf Apple
+Silicon läuft alles nativ.
+
+Das **n8n-Image kannst du auch selbst bauen** — dieses Repo ist dafür
+eigenständig (kein weiteres Repo nötig): der baramundi Connector liegt als
+Tarball unter [`vendor/`](vendor/), das Dockerfile unter [`docker/`](docker/).
+
+```bash
+make build      # baut das n8n-Image lokal aus docker/Dockerfile + vendor/-Connector
+make pull       # zieht Mock + Gateway + n8n als fertige Images aus der GHCR
+```
+
+Mock und MCP-Gateway kommen **immer** aus der GHCR (sie werden aus ihren eigenen
+Repos veröffentlicht). Maintainer publizieren ein neues Multi-Arch-n8n-Image mit
+[`scripts/publish-image.sh`](scripts/publish-image.sh) (Version aus `VERSION`).
+
 ## Die 3 Beispiel-Workflows
 
 ### Workflow 1: Endpoint-Übersicht (Einfach)
@@ -188,12 +207,19 @@ come2gether-2026-challenge/
 ├── README.md                          # Diese Datei
 ├── docker-compose.yml                 # 3 Services: Mock + Gateway + n8n
 ├── .env.example                       # Konfigurations-Vorlage
-├── Makefile                           # build, test, clean
+├── Makefile                           # build (n8n lokal), pull, test, clean
+├── VERSION                            # Version des n8n-Images
 │
 ├── workflows/
 │   ├── 01-endpoint-overview.json      # Einfach: Endpoint-HTML-Übersicht
 │   ├── 02-software-compliance.json    # Mittel: Compliance mit Ampel-Report
 │   └── 03-ai-infra-advisor.json       # KI: Claude + 3 MCP Server
+│
+├── docker/                            # Self-contained n8n-Image-Build
+│   ├── Dockerfile                     # n8n + baramundi Connector (ohne Mock)
+│   └── *.sh                           # Entrypoint + Seed-Skripte
+│
+├── vendor/                            # Eingebundener Connector-Tarball (0.9.1)
 │
 ├── challenge/
 │   ├── AUFGABE.md                     # Aufgabenstellung
@@ -204,7 +230,8 @@ come2gether-2026-challenge/
 │   └── docker-tutorial.md            # Docker-Grundlagen für Einsteiger
 │
 ├── scripts/
-│   └── setup-owner.sh                 # Automatisches n8n Owner-Setup
+│   ├── setup-owner.sh                 # Automatisches n8n Owner-Setup
+│   └── publish-image.sh              # n8n-Image multi-arch nach GHCR publizieren
 │
 ├── branding/
 │   ├── baramundi-logo.svg             # Logo für HTML-Reports
