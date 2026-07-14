@@ -1,40 +1,24 @@
 # come2gether-2026-challenge — Makefile
 #
-# Phase A: Lokaler Build aus Geschwister-Repos
-# Phase B: GHCR-Images (dann entfallen die build-* Targets)
+# Selbstständig: das n8n-Image wird lokal aus diesem Repo gebaut
+# (docker/Dockerfile + vendor/-Connector). Mock und MCP-Gateway kommen
+# als fertige Images aus der GHCR (siehe docker-compose.yml).
 
 # ── Compose-Kommando (V1 oder V2) ─────────────────────────
 COMPOSE := $(shell command -v docker-compose 2>/dev/null || echo "docker compose")
 COMPOSE := $(COMPOSE) -p c2g
 
-# ── Pfade zu Geschwister-Repos ─────────────────────────────
-MOCK_DIR    := ../bConnect-Mock
-MCP_DIR     := ../bConnect-MCP
-N8N_DIR     := ../n8nworkflows
-
-# ── Image-Tags ─────────────────────────────────────────────
-export MOCK_IMAGE    := c2g/bconnect-mock:dev
-export GATEWAY_IMAGE := c2g/mcp-gateway:dev
-export N8N_IMAGE     := c2g/n8n-demo:dev
-
-.PHONY: build build-mock build-gateway build-n8n \
+.PHONY: build pull \
         up down clean \
         test test-lint test-smoke test-workflows test-mcp test-switch test-ai test-all
 
 # ── Build ──────────────────────────────────────────────────
 
-build: build-mock build-gateway build-n8n  ## Alle 3 Images lokal bauen
+build:  ## n8n-Image lokal aus diesem Repo bauen (Mock + Gateway kommen aus GHCR)
+	$(COMPOSE) build n8n
 
-build-mock:  ## bConnect Mock Image bauen
-	docker build -t $(MOCK_IMAGE) $(MOCK_DIR)
-
-build-gateway:  ## MCP Gateway Image bauen
-	docker build -t $(GATEWAY_IMAGE) \
-	  -f $(MCP_DIR)/bconnect-mcp-gateway/Dockerfile $(MCP_DIR)
-
-build-n8n:  ## n8n Demo Image bauen (inkl. Connector + Mock)
-	cd $(N8N_DIR) && bash docker/build.sh
-	docker build -t $(N8N_IMAGE) $(N8N_DIR)
+pull:  ## Mock + Gateway + n8n Images aus der GHCR ziehen
+	$(COMPOSE) pull
 
 # ── Run ────────────────────────────────────────────────────
 

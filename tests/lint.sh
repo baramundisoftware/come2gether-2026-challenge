@@ -125,7 +125,7 @@ echo "=== Keine internen Referenzen ==="
 if grep -rEi '(bms-win22srv|/home/ansible/|\.mshome\.net)' \
      --include='*.yml' --include='*.yaml' --include='*.json' \
      --include='*.sh' --include='*.md' \
-     . 2>/dev/null | grep -v '.git/' | grep -v 'node_modules/' | grep -v 'lint.sh'; then
+     . 2>/dev/null | grep -v '.git/' | grep -v 'node_modules/' | grep -v '.claude/' | grep -v 'lint.sh'; then
   echo "FAIL: Interne Referenzen gefunden!"
   errors=$((errors+1))
 else

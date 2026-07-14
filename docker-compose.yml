@@ -44,7 +44,7 @@ services:
 
   # ── MCP Gateway (13 bConnect MCP-Server) ──────────────────
   mcp-gateway:
-    image: ${GATEWAY_IMAGE:-ghcr.io/baramundisoftware/bconnect-mcp-gateway:edge}
+    image: ${GATEWAY_IMAGE:-ghcr.io/baramundisoftware/bconnect-mcp-gateway:26.1.7}
     container_name: c2g-gateway
     ports:
       - "3001:3001"
@@ -75,8 +75,14 @@ services:
       - challenge-net
 
   # ── n8n + baramundi Connector ─────────────────────────────
+  # Image kommt standardmaessig aus der GHCR. Wer lokal bauen will
+  # (make build), erzeugt es selbstständig aus docker/Dockerfile +
+  # dem vendor/-Connector — ohne Geschwister-Repos.
   n8n:
     image: ${N8N_IMAGE:-ghcr.io/baramundisoftware/come2gether-2026-challenge:latest}
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
     container_name: c2g-n8n
     ports:
       - "5678:5678"

@@ -1,0 +1,19 @@
+# Keep the n8n-demo build context small — only vendor/, workflows/ and
+# docker/ are needed by docker/Dockerfile.
+.git
+.github
+n8n_data
+tests
+branding
+challenge
+docs
+README.md
+Makefile
+docker-compose*.yml
+.env
+.env.example
+
+# Internal-only workflow — kept out of git (.git/info/exclude) and out of
+# the published image. (It is still seeded at runtime IF present in the
+# ./workflows bind-mount from docker-compose.yml.)
+workflows/04-hardware-procurement.json
