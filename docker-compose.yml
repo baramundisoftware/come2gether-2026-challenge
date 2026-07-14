@@ -51,6 +51,11 @@ services:
     environment:
       MCP_GATEWAY_PORT: "3001"
       MCP_GATEWAY_BIND: "0.0.0.0"
+      # Gateway >=26.1.x refuses a non-loopback bind unless this asserts a
+      # proxy/trusted network is in front. In this challenge the gateway is
+      # only reachable on the internal compose network (demo/dev), so we
+      # assert no-auth. Do NOT expose port 3001 publicly without a real proxy.
+      MCP_ALLOW_NO_AUTH: "true"
       BCONNECT_BASE_URL: ${BCONNECT_BASE_URL:-http://bconnect-mock:3433/bconnect}
       BCONNECT_USERNAME: ${BCONNECT_USERNAME:-mockuser}
       BCONNECT_PASSWORD: ${BCONNECT_PASSWORD:-mockpass}
