@@ -13,8 +13,6 @@
 # Umschaltung Mock / Real bConnect: nur .env anpassen,
 # dann: docker-compose down -v && docker-compose up -d
 
-version: "2.4"
-
 services:
 
   # ── bConnect Mock Server ──────────────────────────────────

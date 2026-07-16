@@ -25,11 +25,28 @@ cd come2gether-2026-challenge
 ### An der GitHub Container Registry anmelden (einmalig)
 
 Die Container-Images liegen **privat** in der GitHub Container Registry (GHCR).
-Melde dich einmal an, sonst bricht `docker compose up` mit `denied` ab:
+Melde dich einmal an, sonst bricht `docker compose up` mit `denied` ab.
+
+**Voraussetzung:** die GitHub CLI `gh` (>= 2.17). Wird `gh` **nicht erkannt**,
+installiere sie — Windows: `winget install --id GitHub.cli` (oder
+<https://cli.github.com/>) — und öffne danach ein **neues** Terminal.
+
+**Linux / Mac / Git-Bash:**
 
 ```bash
-gh auth refresh -s read:packages      # Scope einmalig ergaenzen — braucht gh >= 2.17
+gh auth login                         # einmalig anmelden: GitHub.com → HTTPS → Browser
+gh auth refresh -s read:packages      # read:packages-Scope ergaenzen
 gh auth token | docker login ghcr.io -u "$(gh api user --jq .login)" --password-stdin
+```
+
+**Windows PowerShell** (die bash-Zeile oben funktioniert in PowerShell/CMD **nicht** —
+`$(...)` wird dort nicht ausgewertet):
+
+```powershell
+gh auth login
+gh auth refresh -s read:packages
+$me = gh api user --jq .login
+gh auth token | docker login ghcr.io -u $me --password-stdin
 ```
 
 Ohne die `gh` CLI **oder mit gh < 2.17** (`gh --version` prüfen — das Ubuntu-Paket
@@ -268,6 +285,17 @@ come2gether-2026-challenge/
 - Meist keine fehlenden Rechte, sondern zu altes `gh`: `gh --version` prüfen
   (nötig: >= 2.17), sonst den PAT-Weg im [GHCR-Abschnitt](#an-der-github-container-registry-anmelden-einmalig) nutzen.
 - Richtiger Account? `gh api user --jq .login`
+
+**Windows: Docker Desktop startet nicht (`virtualization support not detected`)?**
+- Prüfe **Task-Manager → Leistung → CPU → „Virtualisierung"**:
+- **Deaktiviert** → Hardware-Virtualisierung im **BIOS** einschalten. Beim Boot
+  ins BIOS (Lenovo ThinkCentre: **F1** am Logo), dann
+  **Advanced → CPU Setup → Intel(R) Virtualization Technology → Enabled**
+  (AMD: „SVM Mode"). **F10** speichern, danach den PC **komplett herunterfahren
+  und neu starten** (Kaltstart — ein Neustart reicht oft nicht).
+- **Aktiviert** → Windows-Features aktivieren: `wsl --install` (PowerShell als
+  Administrator), neu starten, dann in Docker Desktop → Settings → General
+  **„Use the WSL 2 based engine"** anhaken.
 
 **Container starten nicht?**
 ```bash
