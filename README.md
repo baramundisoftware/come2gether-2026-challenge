@@ -22,19 +22,24 @@ Die Container-Images liegen **privat** in der GitHub Container Registry (GHCR).
 Melde dich einmal an, sonst bricht `docker compose up` mit `denied` ab:
 
 ```bash
-gh auth refresh -s read:packages                                    # Scope einmalig ergaenzen
-gh auth token | docker login ghcr.io -u DEIN-GITHUB-USER --password-stdin
+gh auth refresh -s read:packages      # Scope einmalig ergaenzen — braucht gh >= 2.17
+gh auth token | docker login ghcr.io -u "$(gh api user --jq .login)" --password-stdin
 ```
 
-Ohne die `gh` CLI: Erstelle ein Personal Access Token (classic) mit Scope
-`read:packages` unter https://github.com/settings/tokens und nutze es als Passwort:
+Ohne die `gh` CLI **oder mit gh < 2.17** (`gh --version` prüfen — das Ubuntu-Paket
+liefert z. B. 2.4.0, dort fehlt `gh auth token`): Erstelle ein Personal Access Token
+(classic) mit Scope `read:packages` unter https://github.com/settings/tokens
+und nutze es als Passwort:
 
 ```bash
 echo DEIN_TOKEN | docker login ghcr.io -u DEIN-GITHUB-USER --password-stdin
 ```
 
-> **Voraussetzung:** Mitgliedschaft in der `baramundisoftware`-Organisation mit
-> **Read**-Zugriff auf die Pakete. Bei `denied` bitte den Challenge-Owner um Zugriff.
+> **Bei `denied` zuerst `gh --version` prüfen.** Altes `gh` kennt `gh auth token`
+> nicht und schiebt stattdessen seine Fehlermeldung als Passwort in die Pipe —
+> das sieht wie ein Rechteproblem aus, ist aber keins.
+> Erst danach: Mitgliedschaft in der `baramundisoftware`-Organisation mit
+> **Read**-Zugriff auf die Pakete — dafür den Challenge-Owner ansprechen.
 
 Konfiguration anlegen:
 
@@ -90,17 +95,19 @@ flowchart LR
 
 ## Images: ziehen oder selbst bauen
 
-Standardmäßig zieht `docker compose up -d` alle drei Images (Mock, Gateway, n8n)
-als fertige **Multi-Arch-Images (amd64 + arm64)** aus der GHCR — auch auf Apple
-Silicon läuft alles nativ.
+`docker compose up -d` zieht alle drei Images (Mock, Gateway, n8n) als fertige
+**Multi-Arch-Images (amd64 + arm64)** aus der GHCR — auch auf Apple Silicon läuft
+alles nativ. Der baramundi Connector ist im n8n-Image bereits installiert; du
+musst nichts bauen.
 
-Das **n8n-Image kannst du auch selbst bauen** — dieses Repo ist dafür
-eigenständig (kein weiteres Repo nötig): der baramundi Connector liegt als
-Tarball unter [`vendor/`](vendor/), das Dockerfile unter [`docker/`](docker/).
+**Für die Challenge brauchst du diesen Abschnitt nicht.** Wer das n8n-Image
+anpassen will (z. B. anderer Connector), kann es selbst bauen — dieses Repo ist
+dafür eigenständig: der Connector liegt als Tarball unter [`vendor/`](vendor/),
+das Dockerfile unter [`docker/`](docker/).
 
 ```bash
-make build      # baut das n8n-Image lokal aus docker/Dockerfile + vendor/-Connector
-make pull       # zieht Mock + Gateway + n8n als fertige Images aus der GHCR
+make build      # baut das n8n-Image lokal und überschreibt das gezogene
+make pull       # holt die GHCR-Images (wieder) zurück
 ```
 
 Mock und MCP-Gateway kommen **immer** aus der GHCR (sie werden aus ihren eigenen
@@ -111,7 +118,7 @@ Repos veröffentlicht). Maintainer publizieren ein neues Multi-Arch-n8n-Image mi
 
 ### Workflow 1: Endpoint-Übersicht (Einfach)
 
-**Trigger:** Manuell | **Nodes:** 8
+**Trigger:** Manuell | **Nodes:** 7 (+ 1 Sticky Note)
 
 Holt alle Endpoints (Windows, Linux, Mac) über den baramundi Connector,
 führt sie zusammen und erzeugt eine HTML-Seite mit:
@@ -123,7 +130,7 @@ führt sie zusammen und erzeugt eine HTML-Seite mit:
 
 ### Workflow 2: Software-Compliance (Mittel)
 
-**Trigger:** Schedule (täglich) + Manuell | **Nodes:** 11
+**Trigger:** Schedule (täglich) + Manuell | **Nodes:** 9 (+ 1 Sticky Note)
 
 Prüft installierte Software gegen konfigurierbare Regeln:
 - **Allowlist:** Erlaubte Standard-Software (Office, Chrome, Teams, ...)
@@ -139,7 +146,7 @@ bedingte Logik (IF-Node), praxisnahe IT-Compliance
 
 ### Workflow 3: KI-Infrastruktur-Berater (Fortgeschritten)
 
-**Trigger:** Manuell | **Nodes:** 8 | **Braucht:** Anthropic API Key
+**Trigger:** Manuell | **Nodes:** 8 (+ 2 Sticky Notes) | **Braucht:** Anthropic API Key
 
 Claude AI Agent mit drei MCP-Server-Anbindungen:
 - **MCP: Endpoints** — 47 Tools für Endpoint-Verwaltung
@@ -250,6 +257,11 @@ come2gether-2026-challenge/
 ```
 
 ## Fehlerbehebung
+
+**`docker login` sagt `denied`?**
+- Meist keine fehlenden Rechte, sondern zu altes `gh`: `gh --version` prüfen
+  (nötig: >= 2.17), sonst den PAT-Weg im [GHCR-Abschnitt](#an-der-github-container-registry-anmelden-einmalig) nutzen.
+- Richtiger Account? `gh api user --jq .login`
 
 **Container starten nicht?**
 ```bash
