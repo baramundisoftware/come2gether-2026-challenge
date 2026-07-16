@@ -80,14 +80,11 @@ services:
       - challenge-net
 
   # ── n8n + baramundi Connector ─────────────────────────────
-  # Image kommt standardmaessig aus der GHCR. Wer lokal bauen will
-  # (make build), erzeugt es selbstständig aus docker/Dockerfile +
-  # dem vendor/-Connector — ohne Geschwister-Repos.
+  # Image kommt immer aus der GHCR (Connector ist bereits enthalten).
+  # Bewusst OHNE build:-Block — sonst wuerde `docker compose up` das Image
+  # lokal bauen statt es zu ziehen. Wer selbst bauen will: `make build`.
   n8n:
     image: ${N8N_IMAGE:-ghcr.io/baramundisoftware/come2gether-2026-challenge:latest}
-    build:
-      context: .
-      dockerfile: docker/Dockerfile
     container_name: c2g-n8n
     ports:
       - "${N8N_HOST_PORT:-5678}:5678"
