@@ -5,8 +5,14 @@
 # als fertige Images aus der GHCR (siehe docker-compose.yml).
 
 # ── Compose-Kommando (V1 oder V2) ─────────────────────────
+# Bewusst OHNE -p: sonst arbeiten `make ...` und die `docker compose ...`
+# Befehle aus der README auf zwei verschiedenen Compose-Projekten — `make down`
+# wuerde einen per `docker compose up` gestarteten Stack nicht finden.
 COMPOSE := $(shell command -v docker-compose 2>/dev/null || echo "docker compose")
-COMPOSE := $(COMPOSE) -p c2g
+
+# Ziel-Tag des lokal gebauten n8n-Images. Muss dem image: in der
+# docker-compose.yml entsprechen, damit `up` das lokale Image nutzt.
+N8N_IMAGE ?= ghcr.io/baramundisoftware/come2gether-2026-challenge:latest
 
 .PHONY: build pull \
         up down clean \
@@ -14,8 +20,8 @@ COMPOSE := $(COMPOSE) -p c2g
 
 # ── Build ──────────────────────────────────────────────────
 
-build:  ## n8n-Image lokal aus diesem Repo bauen (Mock + Gateway kommen aus GHCR)
-	$(COMPOSE) build n8n
+build:  ## n8n-Image lokal aus diesem Repo bauen (optional; Default ist make pull)
+	docker build -f docker/Dockerfile -t $(N8N_IMAGE) .
 
 pull:  ## Mock + Gateway + n8n Images aus der GHCR ziehen
 	$(COMPOSE) pull
