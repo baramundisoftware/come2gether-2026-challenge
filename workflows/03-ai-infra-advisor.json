@@ -3,27 +3,27 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Workflow 3: KI-Infrastruktur-Berater\n\n**Schwierigkeit:** Fortgeschritten\n**Benötigt:** Anthropic API Key\n\nClaude AI Agent analysiert die gesamte Infrastruktur über\ndrei MCP-Server und erstellt einen Gesundheitsbericht.\n\n**Ablauf:**\n1. Manual Trigger → Start per Klick\n2. AI Agent (Claude) erhält einen Analyse-Prompt\n3. Der Agent entscheidet autonom, welche MCP-Tools er nutzt:\n   - **MCP: Endpoints** (47 Tools) — Endpoint-Daten\n   - **MCP: Jobs** (24 Tools) — Job-Status\n   - **MCP: Compliance** (8 Tools) — Schwachstellen\n4. Code-Node → Agent-Antwort als HTML formatieren\n5. HTML-Node → Bericht anzeigen\n\n**Lerneffekt:** KI-Agenten, MCP-Protokoll, Tool-Use,\nautonome Entscheidungsfindung, Prompt-Engineering\n\n⚠️ Ohne ANTHROPIC_API_KEY in .env wird dieser\nWorkflow nicht funktionieren.",
-        "width": 420,
-        "height": 440
+        "content": "## Workflow 3: KI-Infrastruktur-Berater\n\n**Schwierigkeit:** Fortgeschritten\n**Benötigt:** Anthropic API Key\n\nClaude AI Agent analysiert die gesamte Infrastruktur über\ndrei MCP-Server und erstellt einen Gesundheitsbericht.\n\n**Ablauf:**\n1. Manual Trigger → Start per Klick\n2. AI Agent (Claude) erhält einen Analyse-Prompt\n3. Der Agent entscheidet autonom, welche MCP-Tools er nutzt:\n   - **MCP: Endpoints** (47 Tools) — Endpoint-Daten\n   - **MCP: Jobs** (24 Tools) — Job-Status\n   - **MCP: Compliance** (8 Tools) — Schwachstellen\n4. Code-Node → Agent-Antwort als HTML formatieren\n5. HTML-Node → Bericht anzeigen\n\n**Lerneffekt:** KI-Agenten, MCP-Protokoll, Tool-Use,\nautonome Entscheidungsfindung, Prompt-Engineering\n\n---\n\n**📝 Prompt an Claude** (Feld *Text* im \"AI Agent\"-Node):\n\n> Du bist ein erfahrener IT-Administrator-Assistent für\n> die baramundi Management Suite. Nutze die verfügbaren\n> MCP-Tools um folgende Analyse durchzuführen:\n>\n> 1. Liste alle verwalteten Endpoints auf — wie viele\n>    gibt es, welche Typen (Windows, Linux, Mac)?\n> 2. Gibt es Endpoints, die seit über 30 Tagen nicht\n>    mehr gesehen wurden?\n> 3. Prüfe den Status der letzten Jobs — gibt es\n>    fehlgeschlagene?\n> 4. Gibt es offene Compliance-Violations oder\n>    Schwachstellen?\n>\n> Fasse die Ergebnisse als strukturierten Infrastruktur-\n> Gesundheitsbericht zusammen. Antworte auf Deutsch.\n\n💡 Den Prompt kannst du im \"AI Agent\"-Node frei anpassen.\n\n⚠️ Ohne ANTHROPIC_API_KEY in .env wird dieser\nWorkflow nicht funktionieren.",
+        "width": 600,
+        "height": 900
       },
       "id": "c2g03-note-0001-0001-000000000000",
       "name": "Beschreibung",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [-240, 60]
+      "position": [-460, 40]
     },
     {
       "parameters": {
-        "content": "## 🔑 Anthropic API Key + Model einrichten\n\n**Damit dieser Workflow funktioniert, brauchst du\neinen Anthropic API Key UND ein Model.**\n\n### API Key:\n1. Key erstellen: https://console.anthropic.com/\n2. Klicke auf den **Claude**-Node (unten)\n3. Bei \"Credential to connect with\":\n   → Wähle **Anthropic API (Challenge)** oder\n   → **Create New Credential**\n4. Nur das Feld **API Key** ausfüllen\n   (den Rest leer lassen)\n5. **Save** — \"Couldn't connect\" kann\n   ignoriert werden\n\n### Model:\n6. Im Claude-Node bei **Model** ein Model\n   aus der Dropdown-Liste wählen, z.B.:\n   - **Claude Sonnet 4.5** (schnell + günstig)\n   - **Claude Opus 4.8** (beste Qualität)\n7. Workflow **speichern** und **testen**\n\n💡 Workflows 1 und 2 funktionieren\nauch ohne API Key.",
+        "content": "## 🔑 Anthropic API Key + Model einrichten\n\n**Damit dieser Workflow funktioniert, brauchst du\neinen Anthropic API Key UND ein Model.**\n\n### API Key:\n1. Key erstellen: https://console.anthropic.com/\n2. Klicke auf den **Claude**-Node (im Workflow)\n3. Bei \"Credential to connect with\":\n   → Wähle **Anthropic API (Challenge)** oder\n   → **Create New Credential**\n4. Nur das Feld **API Key** ausfüllen\n   (den Rest leer lassen)\n5. **Save** — \"Couldn't connect\" kann\n   ignoriert werden\n\n### Model:\n6. Im Claude-Node bei **Model** ein Model\n   aus der Dropdown-Liste wählen, z.B.:\n   - **Claude Sonnet 4.5** (schnell + günstig)\n   - **Claude Opus 4.8** (beste Qualität)\n7. Workflow **speichern** und **testen**\n\n💡 Workflows 1 und 2 funktionieren\nauch ohne API Key.",
         "width": 500,
-        "height": 520
+        "height": 620
       },
       "id": "c2g03-note-0002-0001-000000000000",
       "name": "API Key Anleitung",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [80, 860]
+      "position": [1180, 40]
     },
     {
       "parameters": {},
