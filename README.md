@@ -16,6 +16,12 @@ git clone https://github.com/baramundisoftware/come2gether-2026-challenge.git
 cd come2gether-2026-challenge
 ```
 
+> **Git nötig.** Der `git clone`-Befehl braucht Git — Windows bringt es **nicht**
+> von Haus aus mit. Wird `git` **nicht erkannt** (`'git' is not recognized as an
+> internal or external command`), installiere [Git für Windows](https://git-scm.com/download/win)
+> und öffne danach ein **neues** Terminal (PowerShell/CMD), damit `git` im PATH ist.
+> Ohne Git: das Repo auf GitHub über **Code → Download ZIP** laden und entpacken.
+
 ### An der GitHub Container Registry anmelden (einmalig)
 
 Die Container-Images liegen **privat** in der GitHub Container Registry (GHCR).
