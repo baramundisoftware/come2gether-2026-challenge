@@ -1,8 +1,23 @@
-# baramundi come2gether 2026 Challenge
+# baramundi come2gether 2026 Innovation Challenge
 
-**Automatisiere eine wiederkehrende IT-Admin-Aufgabe mit n8n und/oder MCP mit der bConnect API.**
+Dieses Repo liefert eine schlüsselfertige Test-Umgebung mit allem was du brauchst, um als Kunde von baramundi an der **Innvoation Challenge** im Rahmen des **come2gether 2026** teilzunehmen:
 
-Dieses Repo liefert eine schlüsselfertige Docker-Umgebung mit allem was du brauchst:
+*Automatisiere eine wiederkehrende IT-Admin-Aufgabe mit n8n und/oder MCP mit der bConnect API.*
+
+> [!WARNING] 
+> 🧪 This project is currently in **Technical Preview**.
+> 
+> We're actively refining this project and welcome early feedback. 
+> Features, APIs, and behavior may change over time.
+> 
+> Please perform thorough testing before deployment and use at your own risk. It is *not* recommended for production use.
+>
+> When working with AI services, carefully review permissions, data access, and information shared with models.
+> Avoid using sensitive, confidential, or personal data unless you have verified that your security, privacy, and compliance requirements are met.
+>  
+> Keep an eye on AI token usage, especially during testing, as costs can add up quickly depending on the model and workload.
+
+Dieses Repo liefert eine schlüsselfertige Docker-Umgebung mit folgenden Komponenten:
 
 - **n8n** mit vorinstalliertem baramundi Connector (6 Nodes, 229 Operationen)
 - **bConnect Mock** (simulierte bMS REST API mit realistischen Testdaten)
