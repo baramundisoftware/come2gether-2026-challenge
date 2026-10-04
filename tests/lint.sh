@@ -6,6 +6,21 @@ REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 errors=0
 
+# Interne Muster (Hostnamen, Passwoerter) gehoeren nicht ins oeffentliche Repo.
+# Lokal: tests/.internal-patterns (gitignored, eine ERE pro Zeile, # = Kommentar)
+# oder LINT_INTERNAL_PATTERNS='muster1|muster2'. Ohne beides entfallen diese Checks.
+INTERNAL_PATTERNS_FILE="${INTERNAL_PATTERNS_FILE:-tests/.internal-patterns}"
+internal_re="${LINT_INTERNAL_PATTERNS:-}"
+if [ -z "$internal_re" ] && [ -f "$INTERNAL_PATTERNS_FILE" ]; then
+  internal_re="$(grep -vE '^[[:space:]]*(#|$)' "$INTERNAL_PATTERNS_FILE" | paste -sd'|' - || true)"
+fi
+secret_re='sk-ant-[a-zA-Z0-9_-]{20,}|ANTHROPIC_API_KEY=sk-'
+cred_re='sk-ant-'
+if [ -n "$internal_re" ]; then
+  secret_re="${secret_re}|${internal_re}"
+  cred_re="${cred_re}|${internal_re}"
+fi
+
 echo "=== Compose-Syntax ==="
 COMPOSE_CMD="${COMPOSE_CMD:-$(command -v docker-compose 2>/dev/null || echo 'docker compose')}"
 $COMPOSE_CMD config >/dev/null 2>&1 && echo "PASS" || { echo "FAIL"; errors=$((errors+1)); }
@@ -29,10 +44,10 @@ done
 
 echo ""
 echo "=== Keine Secrets im Repo ==="
-if grep -rE '(sk-ant-[a-zA-Z0-9_-]{20,}|baramundi-2008|ANTHROPIC_API_KEY=sk-)' \
+if grep -rE "(${secret_re})" \
      --include='*.yml' --include='*.yaml' --include='*.json' \
      --include='*.sh' --include='*.md' --include='*.env*' \
-     . 2>/dev/null | grep -v '.gitignore' | grep -v 'lint.sh' | grep -v '.env.example' | grep -v '^\./\.env:'; then
+     . 2>/dev/null | grep -v '.gitignore' | grep -v 'lint.sh' | grep -v '.env.example' | grep -v '^\./\.env:' | grep -v '^\./\.claude/'; then
   echo "FAIL: Secrets gefunden!"
   errors=$((errors+1))
 else
@@ -43,7 +58,7 @@ echo ""
 echo "=== Keine Credentials in Workflow-JSONs ==="
 for f in workflows/*.json; do
   [ -f "$f" ] || continue
-  if jq -r '.. | strings' "$f" 2>/dev/null | grep -qiE '(sk-ant-|baramundi-2008)'; then
+  if jq -r '.. | strings' "$f" 2>/dev/null | grep -qiE "(${cred_re})"; then
     echo "FAIL: $f enthaelt moeglicherweise Credentials"
     errors=$((errors+1))
   else
@@ -122,7 +137,9 @@ fi
 
 echo ""
 echo "=== Keine internen Referenzen ==="
-if grep -rEi '(bms-win22srv|/home/ansible/|\.mshome\.net)' \
+if [ -z "$internal_re" ]; then
+  echo "  SKIP: keine internen Muster konfiguriert (${INTERNAL_PATTERNS_FILE} / LINT_INTERNAL_PATTERNS)"
+elif grep -rEi "(${internal_re})" \
      --include='*.yml' --include='*.yaml' --include='*.json' \
      --include='*.sh' --include='*.md' \
      . 2>/dev/null | grep -v '.git/' | grep -v 'node_modules/' | grep -v '.claude/' | grep -v 'lint.sh'; then

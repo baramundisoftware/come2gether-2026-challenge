@@ -21,3 +21,6 @@ Thumbs.db
 Tasks.md
 Requirements.md
 reports/
+
+# Interne Lint-Muster (siehe tests/lint.sh)
+tests/.internal-patterns
