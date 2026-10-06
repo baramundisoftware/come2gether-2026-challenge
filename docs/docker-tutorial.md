@@ -134,10 +134,12 @@ Wenn du die n8n-Oberfläche siehst und dich einloggen kannst, ist alles startkla
 ruhig ist.
 
 **„denied" / „unauthorized" beim Start**
-→ Die Images liegen privat in der GitHub Container Registry. Du musst dich
-einmalig anmelden — siehe
-[An der GitHub Container Registry anmelden](../README.md#an-der-github-container-registry-anmelden-einmalig)
-im README.
+→ Die Images sind öffentlich, eine Anmeldung ist nicht nötig. Meist stört ein
+altes GHCR-Login — abmelden und neu ziehen:
+```bash
+docker logout ghcr.io
+docker compose pull
+```
 
 **„port is already allocated" / Port belegt**
 → Ein anderes Programm nutzt Port 3433, 3001 oder 5678. Beende es oder finde den

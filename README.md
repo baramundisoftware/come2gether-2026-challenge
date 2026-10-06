@@ -1,6 +1,6 @@
 # baramundi come2gether 2026 Innovation Challenge
 
-Dieses Repo liefert eine schlüsselfertige Test-Umgebung mit allem was du brauchst, um als Kunde von baramundi an der **Innvoation Challenge** im Rahmen des **come2gether 2026** teilzunehmen:
+Dieses Repo liefert eine schlüsselfertige Test-Umgebung mit allem was du brauchst, um als Kunde von baramundi an der **Innovation Challenge** im Rahmen des **come2gether 2026** teilzunehmen:
 
 *Automatisiere eine wiederkehrende IT-Admin-Aufgabe mit n8n und/oder MCP mit der bConnect API.*
 
@@ -37,47 +37,8 @@ cd come2gether-2026-challenge
 > und öffne danach ein **neues** Terminal (PowerShell/CMD), damit `git` im PATH ist.
 > Ohne Git: das Repo auf GitHub über **Code → Download ZIP** laden und entpacken.
 
-### An der GitHub Container Registry anmelden (einmalig)
-
-Die Container-Images liegen **privat** in der GitHub Container Registry (GHCR).
-Melde dich einmal an, sonst bricht `docker compose up` mit `denied` ab.
-
-**Voraussetzung:** die GitHub CLI `gh` (>= 2.17). Wird `gh` **nicht erkannt**,
-installiere sie — Windows: `winget install --id GitHub.cli` (oder
-<https://cli.github.com/>) — und öffne danach ein **neues** Terminal.
-
-**Linux / Mac / Git-Bash:**
-
-```bash
-gh auth login                         # einmalig anmelden: GitHub.com → HTTPS → Browser
-gh auth refresh -s read:packages      # read:packages-Scope ergaenzen
-gh auth token | docker login ghcr.io -u "$(gh api user --jq .login)" --password-stdin
-```
-
-**Windows PowerShell** (die bash-Zeile oben funktioniert in PowerShell/CMD **nicht** —
-`$(...)` wird dort nicht ausgewertet):
-
-```powershell
-gh auth login
-gh auth refresh -s read:packages
-$me = gh api user --jq .login
-gh auth token | docker login ghcr.io -u $me --password-stdin
-```
-
-Ohne die `gh` CLI **oder mit gh < 2.17** (`gh --version` prüfen — das Ubuntu-Paket
-liefert z. B. 2.4.0, dort fehlt `gh auth token`): Erstelle ein Personal Access Token
-(classic) mit Scope `read:packages` unter https://github.com/settings/tokens
-und nutze es als Passwort:
-
-```bash
-echo DEIN_TOKEN | docker login ghcr.io -u DEIN-GITHUB-USER --password-stdin
-```
-
-> **Bei `denied` zuerst `gh --version` prüfen.** Altes `gh` kennt `gh auth token`
-> nicht und schiebt stattdessen seine Fehlermeldung als Passwort in die Pipe —
-> das sieht wie ein Rechteproblem aus, ist aber keins.
-> Erst danach: Mitgliedschaft in der `baramundisoftware`-Organisation mit
-> **Read**-Zugriff auf die Pakete — dafür den Challenge-Owner ansprechen.
+Die Container-Images sind öffentlich — es ist **keine Anmeldung** an der
+GitHub Container Registry (GHCR) und kein GitHub-Account nötig.
 
 Konfiguration anlegen:
 
@@ -296,10 +257,10 @@ come2gether-2026-challenge/
 
 ## Fehlerbehebung
 
-**`docker login` sagt `denied`?**
-- Meist keine fehlenden Rechte, sondern zu altes `gh`: `gh --version` prüfen
-  (nötig: >= 2.17), sonst den PAT-Weg im [GHCR-Abschnitt](#an-der-github-container-registry-anmelden-einmalig) nutzen.
-- Richtiger Account? `gh api user --jq .login`
+**`docker compose up` sagt `denied` / `unauthorized`?**
+- Die Images sind öffentlich, eine Anmeldung ist nicht nötig. Meist steckt ein
+  altes oder abgelaufenes GHCR-Login dahinter — abmelden und neu ziehen:
+  `docker logout ghcr.io` und dann `docker compose pull`.
 
 **Windows: Docker Desktop startet nicht (`virtualization support not detected`)?**
 - Prüfe **Task-Manager → Leistung → CPU → „Virtualisierung"**:
