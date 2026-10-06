@@ -214,6 +214,7 @@ come2gether-2026-challenge/
 ├── docker-compose.yml                 # 3 Services: Mock + Gateway + n8n
 ├── .env.example                       # Konfigurations-Vorlage
 ├── Makefile                           # build (n8n lokal), pull, test, clean
+├── LICENSE                            # MIT-Lizenz
 ├── VERSION                            # Version des n8n-Images
 │
 ├── workflows/
@@ -295,4 +296,4 @@ docker compose up -d
 
 ## Lizenz
 
-MIT
+[MIT](LICENSE) © 2026 baramundi software GmbH
