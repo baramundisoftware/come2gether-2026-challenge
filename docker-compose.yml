@@ -17,7 +17,7 @@ services:
 
   # ── bConnect Mock Server ──────────────────────────────────
   bconnect-mock:
-    image: ${MOCK_IMAGE:-ghcr.io/baramundisoftware/bconnect-mock:0.3.2}
+    image: ${MOCK_IMAGE:-ghcr.io/baramundisoftware/bconnect-mock:0.8.1}
     container_name: c2g-mock
     ports:
       - "${MOCK_HOST_PORT:-3433}:3433"
@@ -42,13 +42,14 @@ services:
 
   # ── MCP Gateway (13 bConnect MCP-Server) ──────────────────
   mcp-gateway:
-    image: ${GATEWAY_IMAGE:-ghcr.io/baramundisoftware/bconnect-mcp-gateway:26.1.7}
+    image: ${GATEWAY_IMAGE:-ghcr.io/baramundisoftware/bconnect-mcp-gateway:26.1.11}
     container_name: c2g-gateway
     ports:
       - "${GATEWAY_HOST_PORT:-3001}:3001"
     environment:
       MCP_GATEWAY_PORT: "3001"
       MCP_GATEWAY_BIND: "0.0.0.0"
+      MCP_GATEWAY_ALLOWED_HOSTS: "localhost,127.0.0.1,[::1],mcp-gateway"
       # Gateway >=26.1.x refuses a non-loopback bind unless this asserts a
       # proxy/trusted network is in front. In this challenge the gateway is
       # only reachable on the internal compose network (demo/dev), so we
