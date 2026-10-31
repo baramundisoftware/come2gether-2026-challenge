@@ -21,7 +21,7 @@
 # ---------------------------------------------------------------------------
 # Stage 1: builder — resolve the connector npm package from the vendored tarball
 # ---------------------------------------------------------------------------
-ARG N8N_VERSION=2.19.4
+ARG N8N_VERSION=2.45.7
 ARG NODE_BUILDER_VERSION=24-alpine
 ARG ALPINE_TOOLS_VERSION=3.22
 
@@ -52,7 +52,7 @@ RUN apk add --no-cache curl jq
 FROM n8nio/n8n:${N8N_VERSION} AS runtime
 
 ARG N8N_VERSION
-ARG CONNECTOR_VERSION=0.9.1
+ARG CONNECTOR_VERSION=0.10.0
 ARG IMAGE_VERSION=0.1.0
 ARG VCS_REF=unknown
 ARG BUILD_DATE
